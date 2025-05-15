@@ -114,9 +114,15 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - mongodb_data:/data/db
+      - ./mongodb_data:/data/db
     networks:
       - elk
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   mongo-express:
     image: mongo-express:1.0.2-20-alpine3.19
@@ -128,10 +134,36 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGODB_USERNAME}
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGODB_PASSWORD}
       ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/admin
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_BASIC_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_BASIC_PASSWORD}
     depends_on:
       - mongodb
     networks:
       - elk
+
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: load-testing-backend
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8080:8080
+  #   environment:
+  #     SPRING_DATA_MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/load-testing?authSource=admin
+  #     SPRING_DATA_MONGODB_DATABASE: load-testing
+  #     ELASTICSEARCH_HOST: elasticsearch
+  #     ELASTICSEARCH_PORT: 9200
+  #     ELASTICSEARCH_USERNAME: elastic
+  #     ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD}
+  #     LOGGING_LEVEL_ROOT: INFO
+  #     SPRING_PROFILES_ACTIVE: docker
+  #   depends_on:
+  #     - mongodb
+  #     - elasticsearch
+  #   networks:
+  #     - elk
 
 networks:
   elk:
@@ -139,4 +171,3 @@ networks:
 
 volumes:
   elasticsearch:
-  mongodb_data:

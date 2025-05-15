@@ -25,3 +25,5 @@ replay_pid*
 
 
 **/.env
+
+**/mongodb_data
