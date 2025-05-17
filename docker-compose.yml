@@ -47,7 +47,7 @@ services:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
       - ./docker-elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
-      - elasticsearch:/usr/share/elasticsearch/data:Z
+      - ./docker-elk/elasticsearch/elasticsearch_data:/usr/share/elasticsearch/data:Z
     ports:
       - 9200:9200
       - 9300:9300
@@ -171,6 +171,7 @@ services:
   #     JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS: 8640000
   #     JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS: 8640000
   #     SPRING_PROFILES_ACTIVE: docker
+  #     LOGSTASH_HOST: logstash:5000
   #   depends_on:
   #     - mongodb
   #     - elasticsearch
@@ -249,6 +250,3 @@ services:
 networks:
   elk:
     driver: bridge
-
-volumes:
-  elasticsearch:
