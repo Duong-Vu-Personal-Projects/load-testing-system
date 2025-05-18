@@ -34,7 +34,7 @@ public class GlobalException {
     @ExceptionHandler(value = {
             BadCredentialsException.class
     })
-    public ResponseEntity<ApiResponse<?>> handleLoginException(IllegalArgumentException exception) {
+    public ResponseEntity<ApiResponse<?>> handleLoginException(BadCredentialsException exception) {
         var result = new ApiResponse<>(HttpStatus.UNAUTHORIZED, exception.getMessage() , null, "UNAUTHORIZED");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
     }

@@ -1,6 +1,8 @@
-import { Button, Form, Input, Typography, Row, Col, Card } from 'antd';
+import {Button, Form, Input, Typography, Row, Col, Card, App} from 'antd';
 import type { FormProps } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
+import {registerAPI} from "../../../services/api.ts";
+import { useState } from 'react';
 
 type FieldType = {
   fullName: string;
@@ -11,11 +13,20 @@ type FieldType = {
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-
-  const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
-    console.log('Success:', values);
-    // TODO: call your register API here, then:
-    navigate('/login');
+  const [isSubmit, setIsSubmit] = useState(false);
+  const {message} = App.useApp();
+  const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
+    setIsSubmit(true);
+    const {fullName, username, email, password} = values;
+    const res = await registerAPI(fullName, email, password, username);
+    console.log(res);
+    if (res?.data) {
+      message.success("Register user successfully!");
+      navigate("/login");
+    } else {
+      message.error(res.message);
+    }
+    setIsSubmit(false);
   };
 
   const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
@@ -35,7 +46,7 @@ const RegisterPage = () => {
           </Typography.Title>
 
           <Form
-            name="register"
+            name="register-form"
             labelCol={{ span: 8 }}
             wrapperCol={{ span: 16 }}
             initialValues={{ remember: true }}
@@ -98,7 +109,7 @@ const RegisterPage = () => {
               </Form.Item>
 
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-              <Button type="primary" htmlType="submit" block>
+              <Button type="primary" htmlType="submit" block loading={isSubmit}>
                 Register
               </Button>
             </Form.Item>

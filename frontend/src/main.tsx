@@ -5,6 +5,7 @@ import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import HomePage from "./pages/client/home.tsx";
 import LoginPage from "./pages/client/auth/login.tsx";
 import RegisterPage from "./pages/client/auth/register.tsx";
+import {App} from "antd";
 const router = createBrowserRouter(
     [
         {
@@ -29,6 +30,8 @@ const router = createBrowserRouter(
 )
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router}/>
+      <App>
+          <RouterProvider router={router}/>
+      </App>
   </StrictMode>,
 )
