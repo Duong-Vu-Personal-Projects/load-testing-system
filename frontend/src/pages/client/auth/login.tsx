@@ -1,6 +1,6 @@
 import {Button, Form, Input, Typography, Row, Col, Card, App} from 'antd';
 import type { FormProps } from 'antd';
-import {useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import {loginAPI} from "../../../services/api.ts";
 import { useState } from 'react';
 import {useCurrentApp} from "../../../components/context/app.context.tsx";
@@ -84,6 +84,11 @@ const LoginPage = () => {
               <Button type="primary" htmlType="submit" block loading={isSubmit}>
                 Login
               </Button>
+            </Form.Item>
+            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+              <Typography.Text>
+                Don't have account? <Link to="/register">Register</Link>
+              </Typography.Text>
             </Form.Item>
           </Form>
         </Card>

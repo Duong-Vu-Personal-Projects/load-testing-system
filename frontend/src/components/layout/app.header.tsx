@@ -1,19 +1,24 @@
-import {useContext, useState} from "react";
-import {AppProvider, useCurrentApp} from "../context/app.context.tsx";
-import {useNavigate} from "react-router-dom";
+import {useCurrentApp} from "../context/app.context.tsx";
+import {Link, useNavigate} from "react-router-dom";
 import {logoutAPI} from "../../services/api.ts";
-import {App} from "antd";
+import {App, Menu, type MenuProps} from "antd";
+import {AliwangwangOutlined, ExclamationOutlined, HomeOutlined, LoginOutlined} from "@ant-design/icons";
+import {useState} from "react";
 const AppHeader = () => {
     const {message, notification} = App.useApp();
-    const {user} = useCurrentApp();
+    const {user, setUser, setIsAuthenticated} = useCurrentApp();
     const navigate = useNavigate();
-
+    const [current, setCurrent] = useState<string>("");
+    const onClick: MenuProps['onClick'] = (e) => {
+        setCurrent(e.key);
+    };
     const handleLogout = async () => {
         try {
             const res = await logoutAPI();
-            if (res.data) {
+            if (res.statusCode === 200) {
                 localStorage.removeItem("access_token");
-                setUser({ email: "", name: "", role: "", id: "" });
+                setUser(null);
+                setIsAuthenticated(false);
                 message.success("Logout successfully");
                 navigate("/");
             } else {
@@ -29,12 +34,46 @@ const AppHeader = () => {
             });
         }
     };
+    const items = [
+        {
+            label: <Link to={"/"}>Home</Link>,
+            key: "home",
+            icon: <HomeOutlined />,
+        },
+        {
+            label: <Link to={"/testing"}>Testing</Link>,
+            key: "testing",
+            icon: <ExclamationOutlined />
+        },
+        ...(!user?.id ? [
+            {
+                label: <Link to={"/login"}>Login</Link>,
+                key: "login",
+                icon: <LoginOutlined />,
+            },
+        ] : []),
+        ...(user?.id ? [
+            {
+                label: `Welcome ${user?.fullName}`,
+                key: "setting",
+                icon: <AliwangwangOutlined />,
+                children: [
+                    {
+                        label: <span onClick={() => handleLogout()}>Logout</span>,
+                        key: "logout",
+                    },
+                ],
+            },
+        ] : [])
+    ];
+    if (user?.role === 'ADMIN') {
+        items.unshift({
+            label: <Link to='/admin'>Admin Dashboard</Link>,
+            key: 'admin',
+        });
+    }
     return (
-        <>
-            <div>
-                {JSON.stringify(user)}
-            </div>
-        </>
-    )
+        <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />
+    );
 };
 export default AppHeader;
