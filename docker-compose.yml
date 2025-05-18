@@ -1,0 +1,252 @@
+services:
+
+  # The 'setup' service runs a one-off script which initializes users inside
+  # Elasticsearch — such as 'logstash_internal' and 'kibana_system' — with the
+  # values of the passwords defined in the '.env' file. It also creates the
+  # roles required by some of these users.
+  #
+  # This task only needs to be performed once, during the *initial* startup of
+  # the stack. Any subsequent run will reset the passwords of existing users to
+  # the values defined inside the '.env' file, and the built-in roles to their
+  # default permissions.
+  #
+  # By default, it is excluded from the services started by 'docker compose up'
+  # due to the non-default profile it belongs to. To run it, either provide the
+  # '--profile=setup' CLI flag to Compose commands, or "up" the service by name
+  # such as 'docker compose up setup'.
+  setup:
+    profiles:
+      - setup
+    build:
+      context: ./docker-elk/setup/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    init: true
+    volumes:
+      - ./docker-elk/setup/entrypoint.sh:/entrypoint.sh:ro,Z
+      - ./docker-elk/setup/lib.sh:/lib.sh:ro,Z
+      - ./docker-elk/setup/roles:/roles:ro,Z
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+      METRICBEAT_INTERNAL_PASSWORD: ${METRICBEAT_INTERNAL_PASSWORD:-}
+      FILEBEAT_INTERNAL_PASSWORD: ${FILEBEAT_INTERNAL_PASSWORD:-}
+      HEARTBEAT_INTERNAL_PASSWORD: ${HEARTBEAT_INTERNAL_PASSWORD:-}
+      MONITORING_INTERNAL_PASSWORD: ${MONITORING_INTERNAL_PASSWORD:-}
+      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  elasticsearch:
+    build:
+      context: ./docker-elk/elasticsearch/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    volumes:
+      - ./docker-elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
+      - ./docker-elk/elasticsearch/elasticsearch_data:/usr/share/elasticsearch/data:Z
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      node.name: elasticsearch
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      # Bootstrap password.
+      # Used to initialize the keystore during the initial startup of
+      # Elasticsearch. Ignored on subsequent runs.
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
+      # see: https://www.elastic.co/docs/deploy-manage/deploy/self-managed/bootstrap-checks
+      discovery.type: single-node
+    networks:
+      - elk
+    restart: unless-stopped
+
+  logstash:
+    build:
+      context: ./docker-elk/logstash/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    volumes:
+      - ./docker-elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ./docker-elk/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+    ports:
+      - 5044:5044
+      - 50000:50000/tcp
+      - 50000:50000/udp
+      - 9600:9600
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  kibana:
+    build:
+      context: ./docker-elk/kibana/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    volumes:
+      - ./docker-elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
+    ports:
+      - 5601:5601
+    environment:
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+  
+  mongodb:
+    image: mongo:8.0.9-noble
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongodb_data:/data/db
+    networks:
+      - elk
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  mongo-express:
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: mongo-express
+    restart: unless-stopped
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGODB_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGODB_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/admin
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_BASIC_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_BASIC_PASSWORD}
+    depends_on:
+      - mongodb
+    networks:
+      - elk
+
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: load-testing-backend
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8080:8080
+  #   environment:
+  #     SPRING_APPLICATION_NAME: load-testing
+  #     SPRING_DATA_MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/load_testing?authSource=admin
+  #     SPRING_DATA_MONGODB_DATABASE: load_testing
+  #     SPRING_DATA_MONGODB_CONNECTION_POOL_MAX_SIZE: 100
+  #     SPRING_DATA_MONGODB_CONNECTION_POOL_MIN_SIZE: 5
+  #     SPRING_DATA_MONGODB_CONNECT_TIMEOUT: 5000
+  #     SPRING_DATA_MONGODB_SOCKET_TIMEOUT: 10000
+  #     SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+  #     SPRING_ELASTICSEARCH_USERNAME: elastic
+  #     SPRING_ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD}
+  #     LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_DATA_MONGODB: INFO
+  #     LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_DATA_ELASTICSEARCH: INFO
+  #     MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus,metrics
+  #     MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+  #     MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: true
+  #     MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: true
+  #     JWT_BASE64_SECRET: ${JWT_BASE64_SECRET}
+  #     JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS: 8640000
+  #     JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS: 8640000
+  #     SPRING_PROFILES_ACTIVE: docker
+  #     LOGSTASH_HOST: logstash:5000
+  #   depends_on:
+  #     - mongodb
+  #     - elasticsearch
+  #   networks:
+  #     - elk
+
+  prometheus:
+    image: prom/prometheus:v3.3.1
+    container_name: prometheus
+    user: ":"
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - 9090:9090
+    extra_hosts:
+    - host.docker.internal:host-gateway
+    networks:
+      - elk
+
+  grafana:
+    image: grafana/grafana:12.0.0
+    container_name: grafana
+    restart: unless-stopped
+    user: ":"
+    ports:
+      - 3000:3000
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_ADMIN_USERNAME}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_ADMIN_PASSWORD}
+      # - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./grafana/grafana_data:/var/lib/grafana
+    networks:
+      - elk
+    depends_on:
+      - prometheus
+  # jmeter:
+  #   image: justb4/jmeter:5.6.3
+  #   container_name: jmeter
+  #   volumes:
+  #     - ./jmeter/test-plans:/test-plans
+  #     - ./jmeter/results:/results
+  #   environment:
+  #     - TZ=UTC+7
+  #   networks:
+  #     - elk
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: react-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - 80:80
+  #   volumes:
+  #     - ./frontend:/app  # For development only (remove in production)
+  #     - /app/node_modules # Don't mount node_modules
+  #   environment:
+  #     - NODE_ENV=development  # Change to production for production builds
+  #     - VITE_API_URL=http://localhost:8080  # Backend API URL
+  #     - VITE_KIBANA_URL=http://localhost:5601  # Kibana URL
+  #     - VITE_GRAFANA_URL=http://localhost:3000  # Grafana URL
+  #   depends_on:
+  #     # - backend  # Uncomment when backend is enabled
+  #     - mongodb
+  #   networks:
+  #     - elk
+networks:
+  elk:
+    driver: bridge
