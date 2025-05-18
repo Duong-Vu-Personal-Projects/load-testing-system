@@ -1,40 +1,38 @@
-import {createContext, type ReactNode, useState} from 'react';
+import {createContext, useContext, useState} from "react";
 
-export interface AuthUser {
-    email: string;
-    name: string;
-    role: string;
-    id: string;
-
-}
-
-interface AuthContextType {
-    user: AuthUser;
-    setUser: (user: AuthUser) => void;
+interface IAppContext {
+    isAuthenticated: boolean;
+    setIsAuthenticated: (v: boolean) => void;
+    user: IUser | null;
+    setUser: (u: IUser) => void;
     isAppLoading: boolean;
-    setIsAppLoading: (loading: boolean) => void;
+    setIsAppLoading: (v: boolean) => void;
+
 }
-
-export const AppContext = createContext<AuthContextType>({
-    user: { email: '', name: '', role: '', id: '' },
-    setUser: () => {},
-    isAppLoading: true,
-    setIsAppLoading: () => {},
-});
-
-export const AuthWrapper = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<AuthUser>({
-        email: '',
-        name: '',
-        role: '',
-        id: '',
-    });
-
-    const [isAppLoading, setIsAppLoading] = useState(true);
-
+type TProps = {
+    children: React.ReactNode
+}
+const CurrentAppContext = createContext<IAppContext | null>(null);
+export const AppProvider = (props: TProps) => {
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [user, setUser] = useState<IUser | null>(null);
+    const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
     return (
-        <AppContext.Provider value={{ user, setUser, isAppLoading, setIsAppLoading }}>
-            {children}
-        </AppContext.Provider>
+        <CurrentAppContext.Provider value={{
+            isAuthenticated, setIsAuthenticated, user, setUser, isAppLoading, setIsAppLoading
+        }}>
+            {props.children}
+        </CurrentAppContext.Provider>
     );
+};
+export const useCurrentApp = () => {
+    const currentAppContext = useContext(CurrentAppContext);
+
+    if (!currentAppContext) {
+        throw new Error(
+            "useCurrentApp has to be used within <CurrentUserContext.Provider>"
+        );
+    }
+
+    return currentAppContext;
 };

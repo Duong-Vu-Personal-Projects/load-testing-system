@@ -1,17 +1,12 @@
 import {useContext, useState} from "react";
-import {AppContext} from "../context/app.context.tsx";
+import {AppProvider, useCurrentApp} from "../context/app.context.tsx";
 import {useNavigate} from "react-router-dom";
 import {logoutAPI} from "../../services/api.ts";
 import {App} from "antd";
 const AppHeader = () => {
     const {message, notification} = App.useApp();
-    const [current, setCurrent] = useState("");
-    const { user, setUser } = useContext(AppContext);
+    const {user} = useCurrentApp();
     const navigate = useNavigate();
-
-    const onClick = (e: any) => {
-        setCurrent(e.key);
-    };
 
     const handleLogout = async () => {
         try {
@@ -36,7 +31,9 @@ const AppHeader = () => {
     };
     return (
         <>
-
+            <div>
+                {JSON.stringify(user)}
+            </div>
         </>
     )
 };

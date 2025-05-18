@@ -6,6 +6,7 @@ import HomePage from "./pages/client/home.tsx";
 import LoginPage from "./pages/client/auth/login.tsx";
 import RegisterPage from "./pages/client/auth/register.tsx";
 import {App} from "antd";
+import {AppProvider} from "./components/context/app.context.tsx";
 const router = createBrowserRouter(
     [
         {
@@ -31,7 +32,9 @@ const router = createBrowserRouter(
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
       <App>
-          <RouterProvider router={router}/>
+          <AppProvider>
+              <RouterProvider router={router}/>
+          </AppProvider>
       </App>
   </StrictMode>,
 )
