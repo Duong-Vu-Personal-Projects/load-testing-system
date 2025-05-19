@@ -7,7 +7,7 @@ import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlan;
 import com.vn.ptit.duongvct.dto.response.testplan.TestResultStats;
 import com.vn.ptit.duongvct.repository.mongo.TestPlanRepository;
 import com.vn.ptit.duongvct.service.TestPlanService;
-import com.vn.ptit.duongvct.util.JTLParser;
+import com.vn.ptit.duongvct.util.jmeter.JTLParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import us.abstracta.jmeter.javadsl.core.DslTestPlan;
@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static com.vn.ptit.duongvct.util.jmeter.PerfMonJmeterDsl.perfMonCollector;
 import static us.abstracta.jmeter.javadsl.JmeterDsl.*;
 @Service
 public class TestPlanServiceImpl implements TestPlanService {
@@ -92,6 +93,24 @@ public class TestPlanServiceImpl implements TestPlanService {
             dslTestPlan.children(rpsThreadGroup);
         }
         dslTestPlan.children(jtlWriter(directory, fileName));
+        String cpuJtlFile = directory + "/" + fileName.replace(".jtl", "-cpu.jtl");
+        String memJtlFile = directory + "/" + fileName.replace(".jtl", "-memory.jtl");
+
+        dslTestPlan.children(
+                perfMonCollector("CPU Metrics")
+                        .serverUrl("localhost:4444")
+                        .metric("CPU")
+                        .samplingInterval(1000)
+                        .filename(cpuJtlFile)
+        );
+
+        dslTestPlan.children(
+                perfMonCollector("Memory Metrics")
+                        .serverUrl("localhost:4444")
+                        .metric("Memory")
+                        .samplingInterval(1000)
+                        .filename(memJtlFile)
+        );
         dslTestPlan.saveAsJmx("jmx/" + fileName + ".jmx");
         // Run the test
         TestPlanStats stats = dslTestPlan.run();

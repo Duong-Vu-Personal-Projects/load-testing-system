@@ -1,4 +1,4 @@
-package com.vn.ptit.duongvct.util;
+package com.vn.ptit.duongvct.util.jmeter;
 
 
 import com.vn.ptit.duongvct.dto.response.testplan.TestResultRecord;

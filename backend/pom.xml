@@ -138,7 +138,13 @@
 		<dependency>
 			<groupId>us.abstracta.jmeter</groupId>
 			<artifactId>jmeter-java-dsl</artifactId>
-			<version>1.29.1</version>
+			<version>1.20</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-nop</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-csv -->
 		<dependency>
@@ -151,6 +157,18 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.19.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/kg.apc/jmeter-plugins-perfmon -->
+		<dependency>
+			<groupId>kg.apc</groupId>
+			<artifactId>jmeter-plugins-perfmon</artifactId>
+			<version>2.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-nop</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 
