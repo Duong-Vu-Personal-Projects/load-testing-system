@@ -22,7 +22,6 @@ const LoginPage = () => {
     const {username, password} = values;
     const res = await loginAPI(username, password);
     setIsSubmit(false);
-    console.log(res);
     if (res?.data) {
       localStorage.setItem('access_token', res.data.access_token);
       message.success("Login successfully!");

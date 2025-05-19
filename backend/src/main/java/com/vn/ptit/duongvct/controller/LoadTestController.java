@@ -1,7 +1,7 @@
 package com.vn.ptit.duongvct.controller;
 
 import com.vn.ptit.duongvct.dto.request.testplan.RequestTestPlanDTO;
-import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlanDTO;
+import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlan;
 
 import com.vn.ptit.duongvct.service.TestPlanService;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ public class LoadTestController {
     }
 
     @PostMapping("/run")
-    public ResponseEntity<ResponseTestPlanDTO> runTestPlan(@RequestBody RequestTestPlanDTO dto) throws Exception {
+    public ResponseEntity<ResponseTestPlan> runTestPlan(@RequestBody RequestTestPlanDTO dto) throws Exception {
         return ResponseEntity.ok(this.testPlanService.runTestPlan(dto));
     }
 }

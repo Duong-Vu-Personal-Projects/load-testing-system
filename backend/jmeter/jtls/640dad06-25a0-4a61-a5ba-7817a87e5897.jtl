@@ -1,0 +1,11 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1747582122365,210,HTTP Request,200,OK,Thread Group 1-5,text,true,,429,119,5,5,https://viettelidc.com.vn/,210,0,172
+1747582122577,36,HTTP Request,200,OK,Thread Group 1-5,text,true,,429,119,5,5,https://viettelidc.com.vn/,36,0,0
+1747582122354,259,HTTP Request,200,OK,Thread Group 1-1,text,true,,429,119,5,5,https://viettelidc.com.vn/,259,0,207
+1747582122367,246,HTTP Request,200,OK,Thread Group 1-3,text,true,,429,119,5,5,https://viettelidc.com.vn/,246,0,215
+1747582122369,247,HTTP Request,200,OK,Thread Group 1-4,text,true,,429,119,5,5,https://viettelidc.com.vn/,247,0,202
+1747582122360,256,HTTP Request,200,OK,Thread Group 1-2,text,true,,429,119,5,5,https://viettelidc.com.vn/,256,0,226
+1747582122616,30,HTTP Request,200,OK,Thread Group 1-1,text,true,,429,119,4,4,https://viettelidc.com.vn/,30,0,0
+1747582122616,30,HTTP Request,200,OK,Thread Group 1-3,text,true,,429,119,4,4,https://viettelidc.com.vn/,30,0,0
+1747582122621,43,HTTP Request,200,OK,Thread Group 1-2,text,true,,429,119,3,3,https://viettelidc.com.vn/,43,0,0
+1747582122623,48,HTTP Request,200,OK,Thread Group 1-4,text,true,,429,119,2,2,https://viettelidc.com.vn/,46,0,0

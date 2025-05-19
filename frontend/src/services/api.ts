@@ -22,3 +22,8 @@ export const logoutAPI = () => {
     const urlBackend = "/api/v1/auth/logout";
     return axios.post<IBackendRes<IRegister>>(urlBackend);
 }
+export const createTestAPI = (requestPayload) => {
+    const urlBackend = "/api/v1/load-test/run";
+    return axios.post(urlBackend, requestPayload);
+
+}

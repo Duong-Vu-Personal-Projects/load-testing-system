@@ -19,7 +19,6 @@ const RegisterPage = () => {
     setIsSubmit(true);
     const {fullName, username, email, password} = values;
     const res = await registerAPI(fullName, email, password, username);
-    console.log(res);
     if (res?.data) {
       message.success("Register user successfully!");
       navigate("/login");

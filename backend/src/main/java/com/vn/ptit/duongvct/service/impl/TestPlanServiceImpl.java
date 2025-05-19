@@ -1,9 +1,9 @@
 package com.vn.ptit.duongvct.service.impl;
 
 import com.vn.ptit.duongvct.dto.request.testplan.RequestTestPlanDTO;
-import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlanDTO;
-import com.vn.ptit.duongvct.dto.response.testplan.TestResultRecord;
+import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlan;
 import com.vn.ptit.duongvct.dto.response.testplan.TestResultStats;
+import com.vn.ptit.duongvct.repository.mongo.TestPlanRepository;
 import com.vn.ptit.duongvct.service.TestPlanService;
 import com.vn.ptit.duongvct.util.JTLParser;
 import org.modelmapper.ModelMapper;
@@ -12,31 +12,30 @@ import us.abstracta.jmeter.javadsl.core.DslTestPlan;
 import us.abstracta.jmeter.javadsl.core.TestPlanStats;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static us.abstracta.jmeter.javadsl.JmeterDsl.*;
 @Service
 public class TestPlanServiceImpl implements TestPlanService {
     private final ModelMapper mapper;
-
-    public TestPlanServiceImpl(ModelMapper mapper) {
+    private final TestPlanRepository testPlanRepository;
+    public TestPlanServiceImpl(ModelMapper mapper, TestPlanRepository testPlanRepository) {
         this.mapper = mapper;
+        this.testPlanRepository = testPlanRepository;
     }
 
     @Override
-    public ResponseTestPlanDTO runTestPlan(RequestTestPlanDTO dto) throws IOException {
-//        if (dto.getThroughputTimer() == 0) {
-//            dto.setThroughputTimer(dto.getThreads());
-//        }
+    public ResponseTestPlan runTestPlan(RequestTestPlanDTO dto) throws IOException {
         String fileName = String.valueOf(UUID.randomUUID()) + ".jtl";
         dto.setFileName(fileName);
         String directory = "jmeter/jtls";
+        dto.setTime(LocalDateTime.now());
         // Build test plan components
         DslTestPlan testPlanBuilder = testPlan(
                 threadGroup(dto.getThreads(), dto.getIterations(),
                         httpSampler(dto.getUrl())
-                ),
+                )
                 jtlWriter(directory,fileName)
         );
 
@@ -49,7 +48,7 @@ public class TestPlanServiceImpl implements TestPlanService {
 
         // Run the test
         TestPlanStats stats = testPlanBuilder.run();
-        ResponseTestPlanDTO res = this.mapRequestDTO(dto);
+        ResponseTestPlan res = this.mapRequestDTO(dto);
         TestResultStats testResultStats = new TestResultStats();
         testResultStats.setErrorCount(stats.overall().errorsCount());
         testResultStats.setSampleCounts(stats.duration().toMillis());
@@ -66,13 +65,20 @@ public class TestPlanServiceImpl implements TestPlanService {
 
         res.setStats(testResultStats);
         res.setRecords(JTLParser.parseJtlFile(directory + "/" + fileName));
-
-        return res;
+        return this.createTestPlan(res);
     }
 
 
     @Override
-    public ResponseTestPlanDTO mapRequestDTO(RequestTestPlanDTO dto) {
-        return this.mapper.map(dto, ResponseTestPlanDTO.class);
+    public ResponseTestPlan mapRequestDTO(RequestTestPlanDTO dto) {
+        return this.mapper.map(dto, ResponseTestPlan.class);
+    }
+
+    @Override
+    public ResponseTestPlan createTestPlan(ResponseTestPlan testPlan) {
+        if (this.testPlanRepository.existsByTitle(testPlan.getTitle())) {
+            throw new IllegalArgumentException("Title is already exists. Please choose another title name");
+        }
+        return this.testPlanRepository.save(testPlan);
     }
 }
