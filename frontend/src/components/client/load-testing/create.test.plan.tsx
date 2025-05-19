@@ -9,7 +9,6 @@ const { Option } = Select;
 const { TextArea } = Input;
 const { TabPane } = Tabs;
 
-// Update the interface to match backend structure
 interface ThreadStageGroup {
   url: string;
   rampDuration: number;
