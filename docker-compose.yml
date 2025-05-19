@@ -216,6 +216,7 @@ services:
       - elk
     depends_on:
       - prometheus
+      - influxdb
   # jmeter:
   #   image: justb4/jmeter:5.6.3
   #   container_name: jmeter
@@ -247,6 +248,18 @@ services:
   #     - mongodb
   #   networks:
   #     - elk
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - 8086:8086
+    volumes:
+      - ./influxdb-data:/var/lib/influxdb
+    environment:
+      INFLUXDB_DB: jmeter
+      INFLUXDB_ADMIN_USER: admin
+      INFLUXDB_ADMIN_PASSWORD: admin
+    networks:
+      - elk
 networks:
   elk:
     driver: bridge

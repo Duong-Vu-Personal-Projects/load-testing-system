@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static us.abstracta.jmeter.javadsl.JmeterDsl.*;
+
 @Service
 public class TestPlanServiceImpl implements TestPlanService {
     private final ModelMapper mapper;
@@ -92,6 +93,7 @@ public class TestPlanServiceImpl implements TestPlanService {
             dslTestPlan.children(rpsThreadGroup);
         }
         dslTestPlan.children(jtlWriter(directory, fileName));
+        dslTestPlan.children(influxDbListener("http://localhost:8086/write?db=jmeter"));
         dslTestPlan.saveAsJmx("jmx/" + fileName + ".jmx");
         // Run the test
         TestPlanStats stats = dslTestPlan.run();
