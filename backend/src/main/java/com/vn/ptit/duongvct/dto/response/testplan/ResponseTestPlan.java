@@ -1,5 +1,7 @@
 package com.vn.ptit.duongvct.dto.response.testplan;
 
+import com.vn.ptit.duongvct.domain.testplan.RpsThreadStageGroup;
+import com.vn.ptit.duongvct.domain.testplan.ThreadStageGroup;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -15,14 +17,12 @@ import java.util.ArrayList;
 public class ResponseTestPlan {
     @Id
     private String id;
-    private String url;
     @Indexed(unique = true)
     private String title;
     private LocalDateTime time;
     private String fileName;
-    private int threads;
-    private int iterations;
-    private int throughputTimer;
+    private ArrayList<ThreadStageGroup> threadStageGroups;
+    private ArrayList<RpsThreadStageGroup> rpsThreadStageGroups;
     private ArrayList<TestResultRecord> records;
     private TestResultStats stats;
 }

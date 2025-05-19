@@ -1,0 +1,14 @@
+package com.vn.ptit.duongvct.domain.testplan;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class BaseThreadGroup {
+    protected String url;
+    protected int rampDuration;
+    protected int holdDuration;
+    protected int rampToThreads;
+    protected int throughputTimer;
+}
