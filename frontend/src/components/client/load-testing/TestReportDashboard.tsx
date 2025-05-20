@@ -15,11 +15,11 @@ import {
 } from 'chart.js';
 
 // Import components
-import SummaryCards from './dashboard-components/SummaryCards';
-import TestConfiguration from './dashboard-components/TestConfiguration';
-import ResponseTimeStatistics from './dashboard-components/ResponseTimeStatistics';
-import ChartsTabs from './dashboard-components/ChartsTabs';
-import RequestDetailsTable from './dashboard-components/RequestDetailsTable';
+import SummaryCards from './dashboard-components/summary.cards.tsx';
+import TestConfiguration from './dashboard-components/test.configuration.tsx';
+import ResponseTimeStatistics from './dashboard-components/response.time.statistics.tsx';
+import ChartsTabs from './dashboard-components/charts.tab.tsx';
+import RequestDetailsTable from './dashboard-components/request.details.table.tsx';
 
 // Import utility functions
 import { 

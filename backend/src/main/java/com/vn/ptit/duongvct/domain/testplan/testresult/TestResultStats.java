@@ -1,4 +1,4 @@
-package com.vn.ptit.duongvct.dto.response.testplan;
+package com.vn.ptit.duongvct.domain.testplan.testresult;
 
 import lombok.Getter;
 import lombok.Setter;

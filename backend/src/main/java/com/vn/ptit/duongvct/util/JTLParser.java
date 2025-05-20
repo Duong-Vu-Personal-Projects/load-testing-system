@@ -1,7 +1,7 @@
 package com.vn.ptit.duongvct.util;
 
 
-import com.vn.ptit.duongvct.dto.response.testplan.TestResultRecord;
+import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -10,7 +10,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class JTLParser {
 
@@ -19,9 +24,20 @@ public class JTLParser {
         Path path = Paths.get(filePath);
         CSVParser csvParser = CSVParser.parse(path, StandardCharsets.UTF_8, csvFormat);
         ArrayList<TestResultRecord> records = new ArrayList<>();
+        // Get first timestamp for relative time calculations
+        long firstTimestamp = -1;
+
+        // First parse all records
         for(CSVRecord csvRecord : csvParser) {
             TestResultRecord record = new TestResultRecord();
-            record.setTimeStamp(Long.parseLong(csvRecord.get("timeStamp")));
+
+            // Parse the timestamp and track the first one we see
+            long timestamp = Long.parseLong(csvRecord.get("timeStamp"));
+            if (firstTimestamp == -1 || timestamp < firstTimestamp) {
+                firstTimestamp = timestamp;
+            }
+
+            record.setTimeStamp(timestamp);
             record.setElapsed(Long.parseLong(csvRecord.get("elapsed")));
             record.setLabel(csvRecord.get("label"));
             record.setResponseCode(Integer.parseInt(csvRecord.get("responseCode")));
@@ -41,6 +57,23 @@ public class JTLParser {
 
             records.add(record);
         }
+
+        // Now process all records to add relative time and readable time
+        for (TestResultRecord record : records) {
+            // Calculate seconds since test start (for graphing)
+            double relativeTimeSeconds = (record.getTimeStamp() - firstTimestamp) / 1000.0;
+            record.setRelativeTime(relativeTimeSeconds);
+
+            // Add readable timestamp for display
+            LocalDateTime dateTime = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(record.getTimeStamp()),
+                    ZoneId.systemDefault());
+            record.setReadableTime(dateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+        }
+
+        // Sort records by timestamp (ascending)
+        records.sort(Comparator.comparing(TestResultRecord::getTimeStamp));
+
         return records;
     }
 }

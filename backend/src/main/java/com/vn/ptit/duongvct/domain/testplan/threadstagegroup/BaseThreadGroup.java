@@ -1,4 +1,4 @@
-package com.vn.ptit.duongvct.domain.testplan;
+package com.vn.ptit.duongvct.domain.testplan.threadstagegroup;
 
 import lombok.Getter;
 import lombok.Setter;

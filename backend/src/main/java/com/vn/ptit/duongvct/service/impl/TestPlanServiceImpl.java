@@ -1,12 +1,17 @@
 package com.vn.ptit.duongvct.service.impl;
 
-import com.vn.ptit.duongvct.domain.testplan.RpsThreadStageGroup;
-import com.vn.ptit.duongvct.domain.testplan.ThreadStageGroup;
+import com.vn.ptit.duongvct.domain.testplan.TestPlan;
+import com.vn.ptit.duongvct.domain.testplan.testresult.TestResults;
+import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.RpsThreadStageGroup;
+import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.ThreadStageGroup;
 import com.vn.ptit.duongvct.dto.request.testplan.RequestTestPlanDTO;
-import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlan;
-import com.vn.ptit.duongvct.dto.response.testplan.TestResultStats;
+import com.vn.ptit.duongvct.dto.response.testplan.ResponseRunTestPlanDTO;
+import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultStats;
+import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlanDetailDTO;
 import com.vn.ptit.duongvct.repository.mongo.TestPlanRepository;
+import com.vn.ptit.duongvct.repository.mongo.TestResultRepository;
 import com.vn.ptit.duongvct.service.TestPlanService;
+import com.vn.ptit.duongvct.service.TestResultService;
 import com.vn.ptit.duongvct.util.JTLParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -19,6 +24,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 
 import static us.abstracta.jmeter.javadsl.JmeterDsl.*;
@@ -26,13 +32,15 @@ import static us.abstracta.jmeter.javadsl.JmeterDsl.*;
 public class TestPlanServiceImpl implements TestPlanService {
     private final ModelMapper mapper;
     private final TestPlanRepository testPlanRepository;
-    public TestPlanServiceImpl(ModelMapper mapper, TestPlanRepository testPlanRepository) {
+    private final TestResultService testResultService;
+    public TestPlanServiceImpl(ModelMapper mapper, TestPlanRepository testPlanRepository, TestResultService testResultService) {
         this.mapper = mapper;
         this.testPlanRepository = testPlanRepository;
+        this.testResultService = testResultService;
     }
 
     @Override
-    public ResponseTestPlan runTestPlan(RequestTestPlanDTO dto) throws IOException {
+    public ResponseRunTestPlanDTO runTestPlan(RequestTestPlanDTO dto) throws IOException {
         if (this.testPlanRepository.existsByTitle(dto.getTitle())) {
             throw new IllegalArgumentException("Title is already exists. Please choose another title name");
         }
@@ -95,7 +103,7 @@ public class TestPlanServiceImpl implements TestPlanService {
         dslTestPlan.saveAsJmx("jmx/" + fileName + ".jmx");
         // Run the test
         TestPlanStats stats = dslTestPlan.run();
-        ResponseTestPlan res = this.mapRequestDTO(dto);
+        TestPlan res = this.mapRequestDTO(dto);
         res.setFileName(fileName);
         res.setTime(LocalDateTime.now());
         TestResultStats testResultStats = new TestResultStats();
@@ -113,21 +121,42 @@ public class TestPlanServiceImpl implements TestPlanService {
         testResultStats.setDuration(stats.duration().toMillis());
 
         res.setStats(testResultStats);
-        res.setRecords(JTLParser.parseJtlFile(directory + "/" + fileName));
-        return this.createTestPlan(res);
+
+        TestResults results = new TestResults();
+        results.setRecords(JTLParser.parseJtlFile(directory + "/" + fileName));
+        res.setResults(this.testResultService.createTestResult(results));
+
+        return this.mapTestPlan(this.createTestPlan(res));
     }
 
 
     @Override
-    public ResponseTestPlan mapRequestDTO(RequestTestPlanDTO dto) {
-        return this.mapper.map(dto, ResponseTestPlan.class);
+    public TestPlan mapRequestDTO(RequestTestPlanDTO dto) {
+        return this.mapper.map(dto, TestPlan.class);
     }
 
     @Override
-    public ResponseTestPlan createTestPlan(ResponseTestPlan testPlan) {
+    public TestPlan createTestPlan(TestPlan testPlan) {
         if (this.testPlanRepository.existsByTitle(testPlan.getTitle())) {
             throw new IllegalArgumentException("Title is already exists. Please choose another title name");
         }
         return this.testPlanRepository.save(testPlan);
+    }
+
+    @Override
+    public ResponseRunTestPlanDTO mapTestPlan(TestPlan testPlan) {
+        return mapper.map(testPlan, ResponseRunTestPlanDTO.class);
+    }
+
+    @Override
+    public Optional<TestPlan> findById(String id) {
+        return this.testPlanRepository.findById(id);
+    }
+
+    @Override
+    public ResponseTestPlanDetailDTO mapTestPlanToResult(TestPlan testPlan) {
+        ResponseTestPlanDetailDTO res =  mapper.map(testPlan, ResponseTestPlanDetailDTO.class);
+        res.setResultDTO(this.testResultService.getTestResultById(testPlan.getResults().getId()));
+        return res;
     }
 }

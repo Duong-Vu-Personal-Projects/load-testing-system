@@ -1,7 +1,9 @@
-package com.vn.ptit.duongvct.dto.response.testplan;
-
-import com.vn.ptit.duongvct.domain.testplan.RpsThreadStageGroup;
-import com.vn.ptit.duongvct.domain.testplan.ThreadStageGroup;
+package com.vn.ptit.duongvct.domain.testplan;
+import com.vn.ptit.duongvct.domain.testplan.testresult.TestResults;
+import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.RpsThreadStageGroup;
+import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.ThreadStageGroup;
+import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultRecord;
+import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultStats;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -14,7 +16,7 @@ import java.util.ArrayList;
 @Document(collection = "test_plans")
 @Getter
 @Setter
-public class ResponseTestPlan {
+public class TestPlan {
     @Id
     private String id;
     @Indexed(unique = true)
@@ -23,6 +25,6 @@ public class ResponseTestPlan {
     private String fileName;
     private ArrayList<ThreadStageGroup> threadStageGroups;
     private ArrayList<RpsThreadStageGroup> rpsThreadStageGroups;
-    private ArrayList<TestResultRecord> records;
+    private TestResults results;
     private TestResultStats stats;
 }

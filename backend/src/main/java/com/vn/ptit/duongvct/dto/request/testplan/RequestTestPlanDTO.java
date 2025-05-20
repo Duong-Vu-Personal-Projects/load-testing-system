@@ -1,11 +1,10 @@
 package com.vn.ptit.duongvct.dto.request.testplan;
 
-import com.vn.ptit.duongvct.domain.testplan.RpsThreadStageGroup;
-import com.vn.ptit.duongvct.domain.testplan.ThreadStageGroup;
+import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.RpsThreadStageGroup;
+import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.ThreadStageGroup;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 @Getter

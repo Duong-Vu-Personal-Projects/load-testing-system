@@ -11,7 +11,7 @@ import ProtectedRoute from "./components/auth/auth.tsx";
 import ManageTestingPage from "./pages/client/manage.testing.tsx";
 import AdminLayout from './components/layout/admin.layout.tsx';
 import AdminDashboard from './pages/admin/admin.dashboard.tsx';
-import CreateTestPlan from "./components/client/load-testing/create.test.plan.tsx";
+import CreateTestPlan from "./components/client/load-testing/create-test-plan/create.test.plan.tsx";
 import enUS from 'antd/locale/en_US';
 
 const router = createBrowserRouter(

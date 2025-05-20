@@ -1,4 +1,4 @@
-package com.vn.ptit.duongvct.dto.response.testplan;
+package com.vn.ptit.duongvct.domain.testplan.testresult;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -23,5 +23,7 @@ public class TestResultRecord {
     long latency;
     long idleTime;
     long connect;
+    private double relativeTime; // Seconds since test start (for graphing)
+    private String readableTime;
 
 }
