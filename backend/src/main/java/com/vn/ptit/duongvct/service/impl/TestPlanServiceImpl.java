@@ -9,7 +9,6 @@ import com.vn.ptit.duongvct.dto.response.testplan.ResponseRunTestPlanDTO;
 import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultStats;
 import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlanDetailDTO;
 import com.vn.ptit.duongvct.repository.mongo.TestPlanRepository;
-import com.vn.ptit.duongvct.repository.mongo.TestResultRepository;
 import com.vn.ptit.duongvct.service.TestPlanService;
 import com.vn.ptit.duongvct.service.TestResultService;
 import com.vn.ptit.duongvct.util.JTLParser;
@@ -66,7 +65,7 @@ public class TestPlanServiceImpl implements TestPlanService {
             if (stage.getThroughputTimer() != 0) {
                 dslDefaultThreadGroup.children(throughputTimer(stage.getThroughputTimer()));
             }
-            dslDefaultThreadGroup.children(httpSampler(stage.getUrl()));
+            dslDefaultThreadGroup.children(httpSampler(stage.getUrl()).followRedirects(stage.isFollowRedirects()));
             threadGroups.add(dslDefaultThreadGroup);
         }
         ArrayList<RpsThreadGroup> rpThreadGroups = new ArrayList<>();
@@ -89,7 +88,7 @@ public class TestPlanServiceImpl implements TestPlanService {
             if (stage.getThroughputTimer() != 0) {
                 rpsThreadGroup.children(throughputTimer(stage.getThroughputTimer()));
             }
-            rpsThreadGroup.children(httpSampler(stage.getUrl()));
+            rpsThreadGroup.children(httpSampler(stage.getUrl()).followRedirects(stage.isFollowRedirects()));
             rpThreadGroups.add(rpsThreadGroup);
         }
         DslTestPlan dslTestPlan = testPlan();

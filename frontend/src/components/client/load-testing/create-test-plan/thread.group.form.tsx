@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, InputNumber, Button, Card, Space } from 'antd';
+import {Form, Input, InputNumber, Button, Card, Space, Switch} from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { IThreadStageGroup } from './type.test.plan';
 
@@ -14,7 +14,8 @@ const ThreadGroupForm: React.FC<IThreadGroupFormProps> = () => {
         holdDuration: 0,
         rampToThreads: 5,
         throughputTimer: 0,
-        holdIteration: 2
+        holdIteration: 2,
+        isFollowRedirects: true
     };
 
     return (
@@ -38,6 +39,13 @@ const ThreadGroupForm: React.FC<IThreadGroupFormProps> = () => {
                                 ]}
                             >
                                 <Input placeholder="https://example.com/api" />
+                            </Form.Item>
+                            <Form.Item
+                                name={[name, 'isFollowRedirects']}
+                                label="Follow Redirects"
+                                valuePropName="checked"
+                            >
+                                <Switch />
                             </Form.Item>
 
                             <Space style={{ display: 'flex', justifyContent: 'space-between' }}>

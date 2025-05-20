@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, InputNumber, Button, Card, Space } from 'antd';
+import {Form, Input, InputNumber, Button, Card, Space, Switch} from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 
 interface IRpsThreadGroupFormProps {
@@ -13,7 +13,8 @@ const RpsThreadGroupForm: React.FC<IRpsThreadGroupFormProps> = () => {
         holdDuration: 0,
         rampToThreads: 10,
         throughputTimer: 0,
-        maxThreads: 5
+        maxThreads: 5,
+        isFollowRedirects: true
     };
 
     return (
@@ -37,6 +38,13 @@ const RpsThreadGroupForm: React.FC<IRpsThreadGroupFormProps> = () => {
                                 ]}
                             >
                                 <Input placeholder="https://example.com/api" />
+                            </Form.Item>
+                            <Form.Item
+                                name={[name, 'isFollowRedirects']}
+                                label="Follow Redirects"
+                                valuePropName="checked"
+                            >
+                                <Switch />
                             </Form.Item>
 
                             <Space style={{ display: 'flex', justifyContent: 'space-between' }}>

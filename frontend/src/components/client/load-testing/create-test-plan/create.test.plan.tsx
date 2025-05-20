@@ -60,10 +60,16 @@ const CreateTestPlan: React.FC = () => {
 
       const response = await createTestAPI(requestPayload);
       if (response.data) {
+        console.log(response.data);
         setTestResults(response.data);
         notification.success({
           message: 'Test Plan Executed Successfully',
           description: `Test "${values.title}" ran successfully!`
+        });
+      } else {
+        notification.error({
+          message: 'Test Plan Execution Failed',
+          description: response.message,
         });
       }
 

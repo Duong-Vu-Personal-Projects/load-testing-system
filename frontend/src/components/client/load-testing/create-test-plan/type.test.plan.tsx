@@ -1,5 +1,6 @@
 export interface IThreadStageGroup {
     url: string;
+    isFollowRedirects: boolean;
     rampDuration: number;
     holdDuration: number;
     rampToThreads: number;
@@ -9,6 +10,7 @@ export interface IThreadStageGroup {
 
 export interface IRpsThreadStageGroup {
     url: string;
+    isFollowRedirects: boolean;
     rampDuration: number;
     holdDuration: number;
     rampToThreads: number;
@@ -57,6 +59,5 @@ export interface ITestResult {
     fileName: string;
     threadStageGroups: IThreadStageGroup[];
     rpsThreadStageGroups: IRpsThreadStageGroup[];
-    records: any[];
     stats: ITestResultStats;
 }
