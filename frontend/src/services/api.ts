@@ -25,5 +25,12 @@ export const logoutAPI = () => {
 export const createTestAPI = (requestPayload) => {
     const urlBackend = "/api/v1/load-test/run";
     return axios.post(urlBackend, requestPayload);
-
+}
+export const getTestResultByIdAPI = (id: string) => {
+    const urlBackend = `/api/v1/load-test/${id}`;
+    return axios.get(urlBackend);
+}
+export const getAllTestPlanWithPagination = (page: number = 1, size: number = 5) => {
+    const urlBackend = `/api/v1/load-test?page=${page}&size=${size}`;
+    return axios.get(urlBackend);
 }

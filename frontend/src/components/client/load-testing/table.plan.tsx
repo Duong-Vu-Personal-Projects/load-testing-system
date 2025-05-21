@@ -1,97 +1,135 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Space, Card, Typography } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { useRef, useState } from 'react';
+import { App, Button, Card, Space } from 'antd';
+import { EyeTwoTone, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { ProTable } from '@ant-design/pro-components';
+import { getAllTestPlanWithPagination } from "../../../services/api.ts";
 
-const { Title } = Typography;
+interface ITableTestPlan {
+    id: string;
+    title: string;
+    time: string;
+}
 
 const TablePlan = () => {
-    const [loading, setLoading] = useState(false);
-    const [data, setData] = useState([]);
+    const actionRef = useRef<ActionType>();
     const navigate = useNavigate();
+    const { notification } = App.useApp();
+    const [meta, setMeta] = useState<IMeta>({
+        page: 0,
+        pageSize: 5,
+        pages: 0,
+        total: 0
+    });
 
-    // Load test plan data
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.get('/api/v1/load-test');
-                if (response && response.data) {
-                    setData(response.data.content || []);
-                }
-            } catch (error) {
-                console.error('Failed to fetch test plans:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        
-        fetchData();
-    }, []);
-
-    const columns = [
+    const columns: ProColumns<ITableTestPlan>[] = [
+        {
+            dataIndex: 'index',
+            valueType: 'indexBorder',
+            width: 48,
+        },
         {
             title: 'Title',
             dataIndex: 'title',
-            key: 'title',
-        },
-        {
-            title: 'URL',
-            dataIndex: 'url',
-            key: 'url',
             ellipsis: true,
+            width: 300,
+            render: (text, record) => (
+                <a onClick={() => navigate(`/testing/result/${record.id}`)}>
+                    {text}
+                </a>
+            ),
         },
         {
-            title: 'Threads',
-            dataIndex: 'threads',
-            key: 'threads',
-        },
-        {
-            title: 'Iterations',
-            dataIndex: 'iterations',
-            key: 'iterations',
-        },
-        {
-            title: 'Created At',
+            title: 'Run time',
             dataIndex: 'time',
-            key: 'time',
-            render: (text) => new Date(text).toLocaleString(),
+            valueType: 'dateTime',
+            sorter: true,
+            width: 160,
         },
         {
             title: 'Actions',
             key: 'actions',
+            width: 120,
             render: (_, record) => (
                 <Space>
-                    <Button type="primary" onClick={() => navigate(`/testing/results/${record.id}`)}>
-                        View Results
-                    </Button>
-                    <Button onClick={() => navigate(`/testing/run/${record.id}`)}>
-                        Run Again
-                    </Button>
+                    <EyeTwoTone
+                        twoToneColor="#1677ff"
+                        style={{ cursor: "pointer", fontSize: '16px' }}
+                        onClick={() => navigate(`/testing/result/${record.id}`)}
+                    />
                 </Space>
             ),
         },
     ];
 
+    const refreshTable = () => {
+        actionRef.current?.reload();
+    };
+
     return (
         <Card>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <Title level={3}>Test Plans</Title>
-                <Button 
-                    type="primary" 
-                    icon={<PlusOutlined />} 
-                    onClick={() => navigate('/testing/create')}
-                >
-                    Create New Test Plan
-                </Button>
-            </div>
-            <Table 
-                columns={columns} 
-                dataSource={data} 
-                rowKey="id" 
-                loading={loading}
-                pagination={{ pageSize: 10 }}
+            <ProTable<ITableTestPlan>
+                columns={columns}
+                actionRef={actionRef}
+                cardBordered
+                search={false}
+                options={{
+                    search: false,
+                }}
+                request={async (params) => {
+                    try {
+                        // Build pagination and sorting
+                        const page = params.current;
+                        const pageSize = params.pageSize || 5;
+
+                        // Make API call
+                        const response = await getAllTestPlanWithPagination(page, pageSize);
+
+                        if (response.data) {
+                            setMeta({
+                                page: response.data.meta.page,
+                                pageSize: pageSize,
+                                pages: response.data.meta.pages,
+                                total: response.data.meta.total
+                            });
+
+                            return {
+                                data: response.data.result,
+                                success: true,
+                                total: response.data.meta.total
+                            };
+                        }
+                        return { data: [], success: false, total: 0 };
+                    } catch (error) {
+                        notification.error({
+                            message: "Failed to fetch test plans",
+                            description: "There was an error loading the test plans."
+                        });
+                        return { data: [], success: false, total: 0 };
+                    }
+                }}
+                rowKey="id"
+                pagination={{
+                    current: meta.page,
+                    pageSize: meta.pageSize,
+                    showSizeChanger: true,
+                    total: meta.total,
+                    showTotal: (total, range) => (
+                        <div>{range[0]}-{range[1]} of {total} test plans</div>
+                    )
+                }}
+                headerTitle="Test Plans"
+                toolBarRender={() => [
+                    <Button
+                        key="create"
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => navigate('/testing/create')}
+                    >
+                        Create New Test Plan
+                    </Button>
+                ]}
             />
         </Card>
     );

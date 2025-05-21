@@ -1,4 +1,4 @@
-import TablePlan from "../../components/client/load-testing/table.plan.tsx";
+import TablePlan from "../../../components/client/load-testing/table.plan.tsx";
 import {Outlet, useLocation} from "react-router-dom";
 
 const ManageTestingPage = () => {

@@ -1,6 +1,5 @@
 package com.vn.ptit.duongvct.util;
 
-
 import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -10,6 +9,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -64,11 +64,18 @@ public class JTLParser {
             double relativeTimeSeconds = (record.getTimeStamp() - firstTimestamp) / 1000.0;
             record.setRelativeTime(relativeTimeSeconds);
 
-            // Add readable timestamp for display
-            LocalDateTime dateTime = LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(record.getTimeStamp()),
-                    ZoneId.systemDefault());
-            record.setReadableTime(dateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+            // Format readable time as duration since start (HH:MM:SS.sss)
+            long millisSinceStart = record.getTimeStamp() - firstTimestamp;
+            Duration duration = Duration.ofMillis(millisSinceStart);
+            long hours = duration.toHours();
+            long minutes = duration.toMinutesPart();
+            long seconds = duration.toSecondsPart();
+            long millis = duration.toMillisPart();
+
+            // Format as 0:00:00.000
+            String readableTime = String.format("%d:%02d:%02d.%03d",
+                    hours, minutes, seconds, millis);
+            record.setReadableTime(readableTime);
         }
 
         // Sort records by timestamp (ascending)

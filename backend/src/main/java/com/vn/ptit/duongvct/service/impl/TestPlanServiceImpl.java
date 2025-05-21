@@ -5,14 +5,18 @@ import com.vn.ptit.duongvct.domain.testplan.testresult.TestResults;
 import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.RpsThreadStageGroup;
 import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.ThreadStageGroup;
 import com.vn.ptit.duongvct.dto.request.testplan.RequestTestPlanDTO;
+import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.ResponseRunTestPlanDTO;
 import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultStats;
+import com.vn.ptit.duongvct.dto.response.testplan.ResponseTableTestPlanDTO;
 import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlanDetailDTO;
 import com.vn.ptit.duongvct.repository.mongo.TestPlanRepository;
 import com.vn.ptit.duongvct.service.TestPlanService;
 import com.vn.ptit.duongvct.service.TestResultService;
 import com.vn.ptit.duongvct.util.JTLParser;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import us.abstracta.jmeter.javadsl.core.DslTestPlan;
 import us.abstracta.jmeter.javadsl.core.TestPlanStats;
@@ -23,6 +27,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -157,5 +162,27 @@ public class TestPlanServiceImpl implements TestPlanService {
         ResponseTestPlanDetailDTO res =  mapper.map(testPlan, ResponseTestPlanDetailDTO.class);
         res.setResultDTO(this.testResultService.getTestResultById(testPlan.getResults().getId()));
         return res;
+    }
+
+    @Override
+    public PaginationResponse getAllTestPlan(Pageable pageable) {
+        Page<TestPlan> pages = this.testPlanRepository.findAll(pageable);
+        PaginationResponse res = setPaginationResponse(pageable, pages);
+        ArrayList<ResponseTableTestPlanDTO> list = new ArrayList<>(pages.getContent().stream().map(
+                testPlan -> this.mapper.map(testPlan, ResponseTableTestPlanDTO.class)
+        ).toList());
+        res.setResult(list);
+        return res;
+    }
+    @Override
+    public PaginationResponse setPaginationResponse (Pageable pageable, Page<TestPlan> pageTestPlan) {
+        PaginationResponse result = new PaginationResponse();
+        PaginationResponse.Meta meta = new PaginationResponse.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(pageTestPlan.getTotalPages());
+        meta.setTotal(pageTestPlan.getTotalElements());
+        result.setMeta(meta);
+        return result;
     }
 }

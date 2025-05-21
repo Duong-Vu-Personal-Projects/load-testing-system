@@ -43,4 +43,10 @@ declare global {
     interface IFetchAccount {
         user: IUser
     }
+    interface IMeta {
+        page: number,
+        pageSize: number,
+        pages: number,
+        total: number
+    }
 }

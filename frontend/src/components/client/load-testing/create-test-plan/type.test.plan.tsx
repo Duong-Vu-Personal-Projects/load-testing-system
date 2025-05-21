@@ -61,3 +61,43 @@ export interface ITestResult {
     rpsThreadStageGroups: IRpsThreadStageGroup[];
     stats: ITestResultStats;
 }
+export interface ITestResultDetail {
+    id: string;
+    title: string;
+    time: string; // ISO string format of LocalDateTime
+    fileName: string;
+    threadStageGroups: IThreadStageGroup[];
+    rpsThreadStageGroups: IRpsThreadStageGroup[];
+    resultDTO: ITestResultDTO;
+    stats: ITestResultStats;
+}
+export interface ITestResultDTO {
+    id: string;
+    timeStamps: number[];
+    elapsedTimes: number[];
+    labels: string[];
+    responseCodes: number[];
+    responseMessages: string[];
+    threadNames: string[];
+    dataTypes: string[];
+    successes: boolean[];
+    failureMessages: string[];
+    bytes: number[];
+    sentBytes: number[];
+    grpThreads: number[];
+    allThreads: number[];
+    urls: string[];
+    latencies: number[];
+    idleTimes: number[];
+    connectTimes: number[];
+    relativeTimes: number[];
+    readableTimes: string[];
+
+    // Aggregated statistics
+    errorCount: number;
+    sampleCount: number;
+    errorRate: number;
+
+    // Throughput data: [second, count]
+    throughputData: Array<[number, number]>;
+}

@@ -8,11 +8,12 @@ import RegisterPage from "./pages/client/auth/register.tsx";
 import {App, ConfigProvider} from "antd";
 import {AppProvider} from "./components/context/app.context.tsx";
 import ProtectedRoute from "./components/auth/auth.tsx";
-import ManageTestingPage from "./pages/client/manage.testing.tsx";
+import ManageTestingPage from "./pages/client/load-testing/manage.testing.tsx";
 import AdminLayout from './components/layout/admin.layout.tsx';
 import AdminDashboard from './pages/admin/admin.dashboard.tsx';
 import CreateTestPlan from "./components/client/load-testing/create-test-plan/create.test.plan.tsx";
 import enUS from 'antd/locale/en_US';
+import TestResultPage from "./pages/client/load-testing/test.result.page.tsx";
 
 const router = createBrowserRouter(
     [
@@ -39,6 +40,10 @@ const router = createBrowserRouter(
                                     <CreateTestPlan/>
                                 </ProtectedRoute>
                             )
+                        },
+                        {
+                            path: '/testing/result/:id',
+                            element: <TestResultPage />
                         }
                     ]
                 }

@@ -71,31 +71,6 @@ const AppHeader = () => {
                     label: <Link to={"/testing/create"}>Create Test</Link>,
                     key: "create-test",
                     icon: <PlusCircleFilled />
-                },
-                {
-                    label: <Link to={"/testing/run"}>Run Test</Link>,
-                    key: "run-test",
-                    icon: <PlayCircleOutlined />
-                },
-                {
-                    label: <Link to={"/testing/history"}>Test History</Link>,
-                    key: "test-history",
-                    icon: <HistoryOutlined />
-                },
-                {
-                    label: <Link to={"/testing/results"}>Test Results</Link>,
-                    key: "test-results",
-                    icon: <FileTextOutlined />
-                },
-                {
-                    label: <Link to={"/testing/metrics"}>Performance Metrics</Link>,
-                    key: "test-metrics",
-                    icon: <LineChartOutlined />
-                },
-                {
-                    label: <Link to={"/testing/dashboard"}>Dashboard</Link>,
-                    key: "test-dashboard",
-                    icon: <DashboardOutlined />
                 }
             ]
         },
