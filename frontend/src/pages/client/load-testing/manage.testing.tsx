@@ -1,9 +1,9 @@
-import TablePlan from "../../../components/client/load-testing/table.plan.tsx";
+import TablePlan from "../../../components/client/load-testing/test-plan/table.plan.tsx";
 import {Outlet, useLocation} from "react-router-dom";
 
 const ManageTestingPage = () => {
     const location = useLocation();
-    const isRootPath = location.pathname === "/testing";
+    const isRootPath = location.pathname === "/plan";
 
     return (
         <div className="testing-container">

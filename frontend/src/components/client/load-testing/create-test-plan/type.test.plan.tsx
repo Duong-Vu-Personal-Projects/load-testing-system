@@ -17,7 +17,20 @@ export interface IRpsThreadStageGroup {
     throughputTimer: number;
     maxThreads: number;
 }
-
+export interface IRequestCreateTestPlan {
+    title: string,
+    threadStageGroups: IThreadStageGroup[],
+    rpsThreadStageGroups: IRpsThreadStageGroup[]
+}
+export interface IRequestRunTestPlan {
+    id: string;
+}
+export interface ITestPlan {
+    id: string,
+    title: string,
+    threadStageGroups: IThreadStageGroup[],
+    rpsThreadStageGroups: IRpsThreadStageGroup[]
+}
 export interface IHttpConfig {
     httpMethod: string;
     followRedirects: boolean;
@@ -57,8 +70,7 @@ export interface ITestResult {
     title: string;
     time: string;
     fileName: string;
-    threadStageGroups: IThreadStageGroup[];
-    rpsThreadStageGroups: IRpsThreadStageGroup[];
+    testPlan: ITestPlan,
     stats: ITestResultStats;
 }
 export interface ITestResultDetail {
@@ -66,8 +78,7 @@ export interface ITestResultDetail {
     title: string;
     time: string; // ISO string format of LocalDateTime
     fileName: string;
-    threadStageGroups: IThreadStageGroup[];
-    rpsThreadStageGroups: IRpsThreadStageGroup[];
+    testPlan: ITestPlan,
     resultDTO: ITestResultDTO;
     stats: ITestResultStats;
 }

@@ -63,12 +63,12 @@ const AppHeader = () => {
             icon: <HomeOutlined />,
         },
         {
-            label: <Link to={"/testing"}>Testing</Link>,
+            label: <Link to={"/plan"}>Test Plan</Link>,
             key: "testing",
             icon: <ExclamationOutlined />,
             children: [
                 {
-                    label: <Link to={"/testing/create"}>Create Test</Link>,
+                    label: <Link to={"/plan/create"}>Create Test Plan</Link>,
                     key: "create-test",
                     icon: <PlusCircleFilled />
                 }

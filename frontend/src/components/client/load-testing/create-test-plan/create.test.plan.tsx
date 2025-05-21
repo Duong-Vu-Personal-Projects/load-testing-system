@@ -1,42 +1,33 @@
 import React, { useState } from 'react';
 import { Form, Button, Card, Divider, Typography, notification, Tabs } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
-import type {ITestPlanFormValues, ITestResult} from "./type.test.plan.tsx";
-import {createTestAPI} from "../../../../services/api.ts";
+import type {IRequestCreateTestPlan, ITestPlanFormValues} from "./type.test.plan.tsx";
+import {createTestPlanAPI} from "../../../../services/api.ts";
 import TestPlanHeader from './test.plan.header.tsx';
 import ThreadGroupForm from './thread.group.form.tsx';
 import HttpConfigForm from "./http.config.form.tsx";
-import ResultsSummary from "./result.summary.tsx";
 import RpsThreadGroupForm from "./rps.thread.group.form.tsx";
-
-
-const { Title } = Typography;
-const { TabPane } = Tabs;
-
-const initialValues: ITestPlanFormValues = {
-  title: '',
-  threadStageGroups: [{
-    url: 'https://',
-    rampDuration: 0,
-    holdDuration: 0,
-    rampToThreads: 5,
-    throughputTimer: 0,
-    holdIteration: 2
-  }],
-  rpsThreadStageGroups: [],
-  httpMethod: 'GET',
-  followRedirects: true,
-  headers: [{ key: 'Content-Type', value: 'application/json' }],
-  requestBody: '',
-  contentType: 'application/json'
-};
+import {useNavigate} from "react-router-dom";
 
 const CreateTestPlan: React.FC = () => {
+  const { Title } = Typography;
+  const { TabPane } = Tabs;
+
+  const initialValues: ITestPlanFormValues = {
+    title: '',
+    threadStageGroups: [],
+    rpsThreadStageGroups: [],
+    httpMethod: 'GET',
+    followRedirects: true,
+    headers: [{ key: 'Content-Type', value: 'application/json' }],
+    requestBody: '',
+    contentType: 'application/json'
+  };
   const [form] = Form.useForm<ITestPlanFormValues>();
   const [loading, setLoading] = useState(false);
   const [showBodyInput, setShowBodyInput] = useState(false);
-  const [testResults, setTestResults] = useState<ITestResult | null>(null);
   const [activeTab, setActiveTab] = useState('threadGroups');
+  const navigate = useNavigate();
 
   const onHttpMethodChange = (value: string) => {
     const showBody = ['POST', 'PUT', 'PATCH'].includes(value);
@@ -50,25 +41,22 @@ const CreateTestPlan: React.FC = () => {
   const onFinish = async (values: ITestPlanFormValues) => {
     try {
       setLoading(true);
-      setTestResults(null);
-
-      const requestPayload = {
+      const requestPayload: IRequestCreateTestPlan = {
         title: values.title,
         threadStageGroups: values.threadStageGroups || [],
         rpsThreadStageGroups: values.rpsThreadStageGroups || []
       };
 
-      const response = await createTestAPI(requestPayload);
+      const response = await createTestPlanAPI(requestPayload);
       if (response.data) {
-        console.log(response.data);
-        setTestResults(response.data);
         notification.success({
-          message: 'Test Plan Executed Successfully',
-          description: `Test "${values.title}" ran successfully!`
+          message: 'Create Test Plan Successfully',
+          description: `Test Plan "${values.title}" created successfully!`
         });
+        navigate(`/plan/${response.data.id}`)
       } else {
         notification.error({
-          message: 'Test Plan Execution Failed',
+          message: 'Failed to create test plan',
           description: response.message,
         });
       }
@@ -76,7 +64,7 @@ const CreateTestPlan: React.FC = () => {
     } catch (error: any) {
       // Handle error
       notification.error({
-        message: 'Test Plan Execution Failed',
+        message: 'Failed to create test plan',
         description: error.response?.data?.message || error.message || 'Unknown error occurred'
       });
     } finally {
@@ -124,13 +112,10 @@ const CreateTestPlan: React.FC = () => {
                 loading={loading}
                 icon={<SendOutlined />}
             >
-              Run Test Plan
+              Create Test Plan
             </Button>
           </Form.Item>
         </Form>
-
-        {/* Test Results */}
-        <ResultsSummary testResults={testResults} />
       </Card>
   );
 };

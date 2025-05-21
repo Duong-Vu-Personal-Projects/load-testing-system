@@ -14,6 +14,9 @@ import AdminDashboard from './pages/admin/admin.dashboard.tsx';
 import CreateTestPlan from "./components/client/load-testing/create-test-plan/create.test.plan.tsx";
 import enUS from 'antd/locale/en_US';
 import TestResultPage from "./pages/client/load-testing/test.result.page.tsx";
+import TestPlanDetail from "./components/client/load-testing/test-plan/test.plan.detail.tsx";
+import TestRunHistory from "./components/client/load-testing/test-plan/test-run-history/test.run.history.tsx";
+import TestResultDashboard from "./components/client/load-testing/dashboard/test.result.dashboard.tsx";
 
 const router = createBrowserRouter(
     [
@@ -26,7 +29,7 @@ const router = createBrowserRouter(
                     element: <HomePage/>
                 },
                 {
-                    path: "/testing",
+                    path: "/plan",
                     element: (
                         <ProtectedRoute>
                             <ManageTestingPage/>
@@ -34,7 +37,7 @@ const router = createBrowserRouter(
                     ),
                     children: [
                         {
-                            path: "/testing/create",
+                            path: "/plan/create",
                             element: (
                                 <ProtectedRoute>
                                     <CreateTestPlan/>
@@ -42,8 +45,16 @@ const router = createBrowserRouter(
                             )
                         },
                         {
-                            path: '/testing/result/:id',
-                            element: <TestResultPage />
+                            path: '/plan/:id',
+                            element: <TestPlanDetail />
+                        },
+                        {
+                            path: '/plan/runs/:id',
+                            element: <TestRunHistory />
+                        },
+                        {
+                            path: '/plan/test-run/:id',
+                            element: <TestResultPage/>
                         }
                     ]
                 }

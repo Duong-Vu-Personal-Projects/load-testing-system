@@ -7,14 +7,19 @@ import com.vn.ptit.duongvct.domain.testplan.testrun.TestRun;
 import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.RpsThreadStageGroup;
 import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.ThreadStageGroup;
 import com.vn.ptit.duongvct.dto.request.testrun.RequestTestRunDTO;
+import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.testrun.ResponseRunTestPlanDTO;
+import com.vn.ptit.duongvct.dto.response.testplan.testrun.ResponseTableTestRunDTO;
 import com.vn.ptit.duongvct.dto.response.testplan.testrun.ResponseTestRunDetailDTO;
+import com.vn.ptit.duongvct.repository.mongo.TestPlanRepository;
 import com.vn.ptit.duongvct.repository.mongo.TestRunRepository;
 import com.vn.ptit.duongvct.service.TestPlanService;
 import com.vn.ptit.duongvct.service.TestResultService;
 import com.vn.ptit.duongvct.service.TestRunService;
 import com.vn.ptit.duongvct.util.JTLParser;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import us.abstracta.jmeter.javadsl.core.DslTestPlan;
 import us.abstracta.jmeter.javadsl.core.TestPlanStats;
@@ -25,8 +30,10 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static us.abstracta.jmeter.javadsl.JmeterDsl.*;
 import static us.abstracta.jmeter.javadsl.JmeterDsl.jtlWriter;
@@ -36,16 +43,18 @@ public class TestRunServiceImpl implements TestRunService {
     private final ModelMapper mapper;
     private final TestRunRepository testRunRepository;
     private final TestResultService testResultService;
-    private final TestPlanService testPlanService;
-    public TestRunServiceImpl(ModelMapper mapper, TestRunRepository testRunRepository, TestResultService testResultService, TestPlanService testPlanService) {
+    private final TestPlanRepository testPlanRepository;
+
+    public TestRunServiceImpl(ModelMapper mapper, TestRunRepository testRunRepository, TestResultService testResultService, TestPlanRepository testPlanRepository) {
         this.mapper = mapper;
         this.testRunRepository = testRunRepository;
         this.testResultService = testResultService;
-        this.testPlanService = testPlanService;
+        this.testPlanRepository = testPlanRepository;
     }
+
     @Override
     public ResponseRunTestPlanDTO runTestPlan(RequestTestRunDTO dto) throws IOException {
-        Optional<TestPlan> testPlanOptional = this.testPlanService.findById(dto.getId());
+        Optional<TestPlan> testPlanOptional = this.testPlanRepository.findById(dto.getId());
         if (testPlanOptional.isEmpty()) {
             throw new IllegalArgumentException("Test Plan Id is not valid!");
         }
@@ -159,6 +168,40 @@ public class TestRunServiceImpl implements TestRunService {
         return this.testRunRepository.findById(id);
     }
 
+    @Override
+    public PaginationResponse getAllTestRunOfTestPlan(Pageable pageable, String testPlanId) {
+        Optional<TestPlan> testPlanOptional = testPlanRepository.findById(testPlanId);
+        if (testPlanOptional.isEmpty()) {
+            throw new IllegalArgumentException("Test plan with id = " + testPlanId + " not found");
+        }
+
+        Page<TestRun> pages = testRunRepository.findPagesByTestPlanId(pageable, testPlanId);
+
+        // Create pagination response
+        PaginationResponse response = new PaginationResponse();
+        PaginationResponse.Meta meta = new PaginationResponse.Meta();
+        meta.setPage(pageable.getPageNumber());
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(pages.getTotalPages());
+        meta.setTotal(pages.getTotalElements());
+        response.setMeta(meta);
+
+        // Map test runs to DTOs
+        List<ResponseTableTestRunDTO> testRunDTOs = pages.getContent().stream()
+                .map(testRun -> mapper.map(testRun, ResponseTableTestRunDTO.class))
+                .collect(Collectors.toList());
+
+        response.setResult(testRunDTOs);
+        return response;
+    }
+
+    @Override
+    public ArrayList<ResponseTableTestRunDTO> getAllTestRunOfTestPlan(String testPlanId) {
+        ArrayList<TestRun> testRuns = testRunRepository.findByTestPlanId(testPlanId);
+        return new ArrayList<>(testRuns.stream()
+                .map(testRun -> mapper.map(testRun, ResponseTableTestRunDTO.class))
+                .collect(Collectors.toList()));
+    }
 
     @Override
     public TestRun createTestRun(TestRun testRun) {

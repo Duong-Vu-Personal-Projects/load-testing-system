@@ -1,0 +1,115 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Table, Card, Button, App } from 'antd';
+import { EyeOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
+import {getTestRunOfTestPlanAPI} from "../../../../../services/api.ts";
+
+interface ITestRun {
+    id: string;
+    title: string;
+    time: string;
+}
+
+const TestRunHistory: React.FC = () => {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    const { notification } = App.useApp();
+
+    const [loading, setLoading] = useState<boolean>(true);
+    const [testRuns, setTestRuns] = useState<ITestRun[]>([]);
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 10,
+        total: 0
+    });
+
+    const columns: ColumnsType<ITestRun> = [
+        {
+            title: 'Run Title',
+            dataIndex: 'title',
+            key: 'title',
+        },
+        {
+            title: 'Time',
+            dataIndex: 'time',
+            key: 'time',
+            render: (time) => dayjs(time).format('YYYY-MM-DD HH:mm:ss'),
+            sorter: (a, b) => dayjs(a.time).valueOf() - dayjs(b.time).valueOf(),
+        },
+        {
+            title: 'Actions',
+            key: 'actions',
+            render: (_, record) => (
+                <Button
+                    type="primary"
+                    icon={<EyeOutlined />}
+                    onClick={() => navigate(`/plan/test-run/${record.id}`)}
+                >
+                    View Results
+                </Button>
+            ),
+        },
+    ];
+
+    // Function to fetch test runs
+    const fetchTestRuns = async () => {
+        if (!id) return;
+
+        try {
+            setLoading(true);
+            // Convert from 1-based (UI) to 0-based (API) pagination
+            const page = pagination.current - 1;
+            
+            const response = await getTestRunOfTestPlanAPI(id, page, pagination.pageSize);
+            
+            if (response.data) {
+                setTestRuns(response.data.result);
+                setPagination({
+                    // Convert from 0-based (API) to 1-based (UI) pagination
+                    current: response.data.meta.page + 1,
+                    pageSize: response.data.meta.pageSize,
+                    total: response.data.meta.total
+                });
+            }
+        } catch (err: any) {
+            notification.error({
+                message: 'Error',
+                description: err?.message
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleTableChange = (newPagination: any) => {
+        setPagination({
+            ...pagination,
+            current: newPagination.current,
+            pageSize: newPagination.pageSize
+        });
+    };
+    useEffect(() => {
+        fetchTestRuns();
+    }, [id, pagination.current, pagination.pageSize]);
+
+    return (
+        <Card title="Test Run History">
+            <Table
+                columns={columns}
+                dataSource={testRuns}
+                rowKey="id"
+                pagination={{
+                    ...pagination,
+                    showSizeChanger: true,
+                    showTotal: (total) => `Total ${total} items`
+                }}
+                loading={loading}
+                onChange={handleTableChange}
+            />
+        </Card>
+    );
+};
+
+export default TestRunHistory;

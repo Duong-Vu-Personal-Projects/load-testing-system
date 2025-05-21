@@ -63,7 +63,6 @@ const TestResultDashboard: React.FC<ITestResultDashboardProps> = ( props:ITestRe
         );
     }
 
-    // If no data is available yet
     if (!testData || !testData.resultDTO) {
         return (
             <Card>

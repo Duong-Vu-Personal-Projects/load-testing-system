@@ -8,6 +8,7 @@ interface ITestInfoPanelProps {
 }
 const TestInfoPanel: React.FC<ITestInfoPanelProps> = (props: ITestInfoPanelProps) => {
     const {testData} = props;
+    console.log("Test Info Panel", testData);
     return (
         <Card>
             <Title level={2}>
@@ -35,7 +36,7 @@ const TestInfoPanel: React.FC<ITestInfoPanelProps> = (props: ITestInfoPanelProps
                 </Descriptions.Item>
 
                 {/* Display thread groups */}
-                {testData.threadStageGroups.map((group, index) => (
+                {testData.testPlan.threadStageGroups.map((group, index) => (
                     <Descriptions.Item
                         label={`Thread Group ${index + 1}`}
                         key={`thread-${index}`}
@@ -51,7 +52,7 @@ const TestInfoPanel: React.FC<ITestInfoPanelProps> = (props: ITestInfoPanelProps
                 ))}
 
                 {/* Display RPS thread groups if any */}
-                {testData.rpsThreadStageGroups && testData.rpsThreadStageGroups.map((group, index) => (
+                {testData.testPlan.rpsThreadStageGroups && testData.testPlan.rpsThreadStageGroups.map((group, index) => (
                     <Descriptions.Item
                         label={`RPS Group ${index + 1}`}
                         key={`rps-${index}`}

@@ -7,6 +7,7 @@ import com.vn.ptit.duongvct.dto.response.testplan.ResponseTableTestPlanDTO;
 import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlanDTO;
 import com.vn.ptit.duongvct.repository.mongo.TestPlanRepository;
 import com.vn.ptit.duongvct.service.TestPlanService;
+import com.vn.ptit.duongvct.service.TestRunService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +20,11 @@ import java.util.Optional;
 @Service
 public class TestPlanServiceImpl implements TestPlanService {
     private final TestPlanRepository testPlanRepository;
+    private final TestRunService testRunService;
     private final ModelMapper mapper;
-    public TestPlanServiceImpl(TestPlanRepository testPlanRepository, ModelMapper modelMapper) {
+    public TestPlanServiceImpl(TestPlanRepository testPlanRepository, TestRunService testRunService, ModelMapper modelMapper) {
         this.testPlanRepository = testPlanRepository;
+        this.testRunService = testRunService;
         this.mapper = modelMapper;
     }
 

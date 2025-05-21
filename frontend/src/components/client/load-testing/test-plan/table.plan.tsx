@@ -4,12 +4,11 @@ import { EyeTwoTone, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
-import { getAllTestPlanWithPagination } from "../../../services/api.ts";
+import { getAllTestPlanWithPagination } from "../../../../services/api.ts";
 
 interface ITableTestPlan {
     id: string;
     title: string;
-    time: string;
 }
 
 const TablePlan = () => {
@@ -35,17 +34,10 @@ const TablePlan = () => {
             ellipsis: true,
             width: 300,
             render: (text, record) => (
-                <a onClick={() => navigate(`/testing/result/${record.id}`)}>
+                <a onClick={() => navigate(`/plan/${record.id}`)}>
                     {text}
                 </a>
             ),
-        },
-        {
-            title: 'Run time',
-            dataIndex: 'time',
-            valueType: 'dateTime',
-            sorter: true,
-            width: 160,
         },
         {
             title: 'Actions',
@@ -56,7 +48,7 @@ const TablePlan = () => {
                     <EyeTwoTone
                         twoToneColor="#1677ff"
                         style={{ cursor: "pointer", fontSize: '16px' }}
-                        onClick={() => navigate(`/testing/result/${record.id}`)}
+                        onClick={() => navigate(`/plan/${record.id}`)}
                     />
                 </Space>
             ),

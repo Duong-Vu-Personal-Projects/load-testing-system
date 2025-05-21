@@ -15,7 +15,7 @@ const TestResultPage: React.FC = () => {
             {/* Breadcrumb navigation */}
             <Breadcrumb style={{ marginBottom: 16 }}>
                 <Breadcrumb.Item>
-                    <a onClick={() => navigate('/testing')}>Load Testing</a>
+                    <a onClick={() => navigate('/plan')}>Test Plan</a>
                 </Breadcrumb.Item>
                 <Breadcrumb.Item>Test Results</Breadcrumb.Item>
                 <Breadcrumb.Item>{id}</Breadcrumb.Item>
@@ -26,7 +26,7 @@ const TestResultPage: React.FC = () => {
                 <Title level={2}>Test Result Dashboard</Title>
                 <Button
                     icon={<ArrowLeftOutlined />}
-                    onClick={() => navigate('/testing')}
+                    onClick={() => navigate('/plan')}
                 >
                     Back to Test Plans
                 </Button>

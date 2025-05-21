@@ -3,10 +3,12 @@ package com.vn.ptit.duongvct.controller;
 import com.vn.ptit.duongvct.domain.testplan.TestPlan;
 import com.vn.ptit.duongvct.domain.testplan.testrun.TestRun;
 import com.vn.ptit.duongvct.dto.request.testrun.RequestTestRunDTO;
+import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.testrun.ResponseRunTestPlanDTO;
 import com.vn.ptit.duongvct.dto.response.testplan.testrun.ResponseTestRunDetailDTO;
 import com.vn.ptit.duongvct.service.TestRunService;
 import com.vn.ptit.duongvct.util.annotation.ApiMessage;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,5 +37,12 @@ public class TestRunController {
             throw new IllegalArgumentException("Cannot find test run with id = " + id);
         }
         return ResponseEntity.ok(this.testRunService.mapTestRunToResult(optionalTestRun.get()));
+    }
+    @GetMapping("/plan/{testPlanId}")
+    @ApiMessage("Get all test runs for a test plan with pagination")
+    public ResponseEntity<PaginationResponse> getTestRunsForTestPlanPaginated(
+            @PathVariable String testPlanId,
+            Pageable pageable) {
+        return ResponseEntity.ok(this.testRunService.getAllTestRunOfTestPlan(pageable, testPlanId));
     }
 }

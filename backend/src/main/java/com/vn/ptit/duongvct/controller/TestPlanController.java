@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/v1/plan")
 public class TestPlanController {
@@ -42,4 +44,14 @@ public class TestPlanController {
         this.testPlanService.deleteTestPlanById(id);
         return ResponseEntity.ok(null);
     }
+    @GetMapping("/{id}")
+    @ApiMessage("Get a test plan detail with id")
+    public ResponseEntity<TestPlan> getTestPlanDetail(@PathVariable String id) {
+        Optional<TestPlan> testPlanOptional = this.testPlanService.findById(id);
+        if (testPlanOptional.isEmpty()) {
+            throw new IllegalArgumentException("Cannot find a test plan with id = " + id);
+        }
+        return ResponseEntity.ok(testPlanOptional.get());
+    }
+
 }
