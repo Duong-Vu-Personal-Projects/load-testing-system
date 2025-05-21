@@ -1,9 +1,10 @@
-package com.vn.ptit.duongvct.domain.testplan;
+package com.vn.ptit.duongvct.domain.testplan.testrun;
+
+import com.vn.ptit.duongvct.domain.testplan.TestPlan;
+import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultStats;
 import com.vn.ptit.duongvct.domain.testplan.testresult.TestResults;
 import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.RpsThreadStageGroup;
 import com.vn.ptit.duongvct.domain.testplan.threadstagegroup.ThreadStageGroup;
-import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultRecord;
-import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultStats;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -13,14 +14,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-@Document(collection = "test_plans")
+@Document(collection = "test_runs")
 @Getter
 @Setter
-public class TestPlan {
+public class TestRun {
     @Id
     private String id;
     @Indexed(unique = true)
     private String title;
-    private ArrayList<ThreadStageGroup> threadStageGroups;
-    private ArrayList<RpsThreadStageGroup> rpsThreadStageGroups;
+    private TestPlan testPlan;
+    private LocalDateTime time;
+    private String fileName;
+    private TestResults results;
+    private TestResultStats stats;
 }

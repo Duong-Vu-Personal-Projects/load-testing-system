@@ -10,5 +10,4 @@ import java.time.LocalDateTime;
 public class ResponseTableTestPlanDTO {
     private String id;
     private String title;
-    private LocalDateTime time;
 }

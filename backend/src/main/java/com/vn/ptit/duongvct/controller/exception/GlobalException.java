@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalException {
@@ -22,11 +23,12 @@ public class GlobalException {
     }
     @ExceptionHandler(
             value = {
-                    IllegalArgumentException.class
+                    IllegalArgumentException.class,
+                    NoSuchElementException.class
             }
 
     )
-    public ResponseEntity<ApiResponse<?>> handleIllegalArgumentException(IllegalArgumentException exception) {
+    public ResponseEntity<ApiResponse<?>> handleIllegalArgumentException(Exception exception) {
         var result = new ApiResponse<>(HttpStatus.BAD_REQUEST, exception.getMessage() , null, "BAD_REQUEST");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
     }

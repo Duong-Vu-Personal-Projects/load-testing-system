@@ -29,8 +29,8 @@
           <stringProp name="HTTPSampler.port"></stringProp>
           <stringProp name="HTTPSampler.path">/</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
         </HTTPSamplerProxy>
         <hashTree/>
       </hashTree>
@@ -68,7 +68,7 @@
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename">jmeter/jtls/6304687a-6dc6-4f49-a112-2d5035fe0463.jtl</stringProp>
+        <stringProp name="filename">jmeter/jtls/70cb8bb8-2750-45a1-b21c-11cfcfd4435b.jtl</stringProp>
       </ResultCollector>
       <hashTree/>
       <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager">
