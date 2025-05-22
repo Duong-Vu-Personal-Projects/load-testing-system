@@ -16,7 +16,7 @@ import enUS from 'antd/locale/en_US';
 import TestResultPage from "./pages/client/load-testing/test.result.page.tsx";
 import TestPlanDetail from "./components/client/load-testing/test-plan/test.plan.detail.tsx";
 import TestRunHistory from "./components/client/load-testing/test-plan/test-run-history/test.run.history.tsx";
-import TestResultDashboard from "./components/client/load-testing/dashboard/test.result.dashboard.tsx";
+import TestRunComparisonPage from "./pages/client/load-testing/test.run.comparision.tsx";
 
 const router = createBrowserRouter(
     [
@@ -46,15 +46,35 @@ const router = createBrowserRouter(
                         },
                         {
                             path: '/plan/:id',
-                            element: <TestPlanDetail />
+                            element: (
+                                <ProtectedRoute>
+                                    <TestPlanDetail />
+                                </ProtectedRoute>
+                            )
                         },
                         {
                             path: '/plan/runs/:id',
-                            element: <TestRunHistory />
+                            element: (
+                                <ProtectedRoute>
+                                    <TestRunHistory />
+                                </ProtectedRoute>
+                            )
                         },
                         {
                             path: '/plan/test-run/:id',
-                            element: <TestResultPage/>
+                            element: (
+                                <ProtectedRoute>
+                                    <TestResultPage/>
+                                </ProtectedRoute>
+                            )
+                        },
+                        {
+                            path: '/plan/compare/:planId/:runId1/:runId2',
+                            element: (
+                                <ProtectedRoute>
+                                    <TestRunComparisonPage/>
+                                </ProtectedRoute>
+                            )
                         }
                     ]
                 }

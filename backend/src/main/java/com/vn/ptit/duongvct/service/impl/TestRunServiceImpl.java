@@ -13,7 +13,6 @@ import com.vn.ptit.duongvct.dto.response.testplan.testrun.ResponseTableTestRunDT
 import com.vn.ptit.duongvct.dto.response.testplan.testrun.ResponseTestRunDetailDTO;
 import com.vn.ptit.duongvct.repository.mongo.TestPlanRepository;
 import com.vn.ptit.duongvct.repository.mongo.TestRunRepository;
-import com.vn.ptit.duongvct.service.TestPlanService;
 import com.vn.ptit.duongvct.service.TestResultService;
 import com.vn.ptit.duongvct.service.TestRunService;
 import com.vn.ptit.duongvct.util.JTLParser;
@@ -68,7 +67,6 @@ public class TestRunServiceImpl implements TestRunService {
         for (ThreadStageGroup stage : testPlan.getThreadStageGroups()) {
             DslDefaultThreadGroup dslDefaultThreadGroup = threadGroup();
             if (stage.getHoldDuration() > 0) {
-                // If there's a hold duration, use rampToAndHold
                 dslDefaultThreadGroup.rampToAndHold(
                         stage.getRampToThreads(),
                         Duration.ofSeconds(stage.getRampDuration()),
@@ -90,14 +88,12 @@ public class TestRunServiceImpl implements TestRunService {
         for (RpsThreadStageGroup stage : testPlan.getRpsThreadStageGroups()) {
             RpsThreadGroup rpsThreadGroup = rpsThreadGroup();
             if (stage.getHoldDuration() > 0) {
-                // If there's a hold duration, use rampToAndHold
                 rpsThreadGroup.rampToAndHold(
                         stage.getRampToThreads(),
                         Duration.ofSeconds(stage.getRampDuration()),
                         Duration.ofSeconds(stage.getHoldDuration())
                 );
             } else {
-                // Otherwise just use rampTo
                 rpsThreadGroup.rampTo(
                         stage.getRampToThreads(),
                         Duration.ofSeconds(stage.getRampDuration())
@@ -177,16 +173,16 @@ public class TestRunServiceImpl implements TestRunService {
 
         Page<TestRun> pages = testRunRepository.findPagesByTestPlanId(pageable, testPlanId);
 
-        // Create pagination response
+
         PaginationResponse response = new PaginationResponse();
         PaginationResponse.Meta meta = new PaginationResponse.Meta();
-        meta.setPage(pageable.getPageNumber());
+        meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
         meta.setPages(pages.getTotalPages());
         meta.setTotal(pages.getTotalElements());
         response.setMeta(meta);
 
-        // Map test runs to DTOs
+
         List<ResponseTableTestRunDTO> testRunDTOs = pages.getContent().stream()
                 .map(testRun -> mapper.map(testRun, ResponseTableTestRunDTO.class))
                 .collect(Collectors.toList());

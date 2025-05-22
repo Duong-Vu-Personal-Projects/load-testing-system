@@ -19,12 +19,37 @@ const TestRunHistory: React.FC = () => {
 
     const [loading, setLoading] = useState<boolean>(true);
     const [testRuns, setTestRuns] = useState<ITestRun[]>([]);
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [pagination, setPagination] = useState({
         current: 1,
         pageSize: 10,
         total: 0
     });
-
+    const handleCompare = () => {
+        if (selectedRowKeys.length !== 2) {
+            notification.warning({
+                message: 'Select Two Test Runs',
+                description: 'Please select exactly two test runs to compare.'
+            });
+            return;
+        }
+        navigate(`/plan/compare/${id}/${selectedRowKeys[0]}/${selectedRowKeys[1]}`);
+    };
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (selectedKeys: React.Key[]) => {
+            if (selectedKeys.length > 2) {
+                const newKeys = selectedKeys.slice(-2);
+                setSelectedRowKeys(newKeys);
+                notification.info({
+                    message: 'Maximum Selection',
+                    description: 'You can only select two test runs for comparison'
+                });
+            } else {
+                setSelectedRowKeys(selectedKeys);
+            }
+        }
+    };
     const columns: ColumnsType<ITestRun> = [
         {
             title: 'Run Title',
@@ -52,23 +77,17 @@ const TestRunHistory: React.FC = () => {
             ),
         },
     ];
-
-    // Function to fetch test runs
     const fetchTestRuns = async () => {
         if (!id) return;
 
         try {
             setLoading(true);
-            // Convert from 1-based (UI) to 0-based (API) pagination
-            const page = pagination.current - 1;
-            
+            const page = pagination.current;
             const response = await getTestRunOfTestPlanAPI(id, page, pagination.pageSize);
-            
             if (response.data) {
                 setTestRuns(response.data.result);
                 setPagination({
-                    // Convert from 0-based (API) to 1-based (UI) pagination
-                    current: response.data.meta.page + 1,
+                    current: response.data.meta.page,
                     pageSize: response.data.meta.pageSize,
                     total: response.data.meta.total
                 });
@@ -95,8 +114,20 @@ const TestRunHistory: React.FC = () => {
     }, [id, pagination.current, pagination.pageSize]);
 
     return (
-        <Card title="Test Run History">
+        <Card
+            title="Test Run History"
+            extra={
+                <Button
+                    type="primary"
+                    onClick={handleCompare}
+                    disabled={selectedRowKeys.length !== 2}
+                >
+                    Compare Selected Runs
+                </Button>
+            }
+        >
             <Table
+                rowSelection={rowSelection}
                 columns={columns}
                 dataSource={testRuns}
                 rowKey="id"
