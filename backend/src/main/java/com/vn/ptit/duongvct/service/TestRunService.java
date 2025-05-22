@@ -21,4 +21,6 @@ public interface TestRunService {
     public Optional<TestRun> findById(String id);
     PaginationResponse getAllTestRunOfTestPlan(Pageable pageable, String testPlanId);
     ArrayList<ResponseTableTestRunDTO> getAllTestRunOfTestPlan(String testPlanId);
+    ArrayList<TestRun> getAllTestRunOfATestPlan(String testPlanId);
+    public void deleteTestRun(TestRun testRun);
 }

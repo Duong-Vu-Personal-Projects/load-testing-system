@@ -1,6 +1,7 @@
 package com.vn.ptit.duongvct.service.impl;
 
 import com.vn.ptit.duongvct.domain.testplan.TestPlan;
+import com.vn.ptit.duongvct.domain.testplan.testrun.TestRun;
 import com.vn.ptit.duongvct.dto.request.testplan.RequestTestPlanDTO;
 import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.ResponseTableTestPlanDTO;
@@ -47,6 +48,10 @@ public class TestPlanServiceImpl implements TestPlanService {
         Optional<TestPlan> testPlan = this.testPlanRepository.findById(id);
         if (testPlan.isEmpty()) {
             throw new NoSuchElementException("Cannot find test plan with id = " + id);
+        }
+        ArrayList<TestRun> testRuns = this.testRunService.getAllTestRunOfATestPlan(id);
+        for (TestRun testRun : testRuns) {
+            this.testRunService.deleteTestRun(testRun);
         }
         this.testPlanRepository.deleteById(id);
     }

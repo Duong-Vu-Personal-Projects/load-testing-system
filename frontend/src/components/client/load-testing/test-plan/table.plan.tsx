@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import { App, Button, Card, Space } from 'antd';
-import { EyeTwoTone, PlusOutlined } from '@ant-design/icons';
+import {DeleteTwoTone, EyeTwoTone, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
-import { getAllTestPlanWithPagination } from "../../../../services/api.ts";
+import {deleteTestPlanAPI, getAllTestPlanWithPagination } from "../../../../services/api.ts";
 
 interface ITableTestPlan {
     id: string;
@@ -14,14 +14,37 @@ interface ITableTestPlan {
 const TablePlan = () => {
     const actionRef = useRef<ActionType>();
     const navigate = useNavigate();
-    const { notification } = App.useApp();
+    const { notification, modal } = App.useApp();
     const [meta, setMeta] = useState<IMeta>({
         page: 0,
         pageSize: 5,
         pages: 0,
         total: 0
     });
-
+    const handleDeleteTestPlan = (testPlanId: string, testPlanTitle: string) => {
+        modal.confirm({
+            title: `Are you sure you want to delete "${testPlanTitle}"?`,
+            content: 'This action will delete the test plan and all of its associated test runs. This cannot be undone.',
+            okText: 'Delete',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            onOk: async () => {
+                try {
+                    await deleteTestPlanAPI(testPlanId);
+                    notification.success({
+                        message: 'Test Plan Deleted',
+                        description: `"${testPlanTitle}" and its associated test runs have been successfully deleted.`,
+                    });
+                    refreshTable();
+                } catch (error: any) {
+                    notification.error({
+                        message: 'Failed to Delete Test Plan',
+                        description: error.response?.data?.message || error.message || 'An unknown error occurred.',
+                    });
+                }
+            },
+        });
+    };
     const columns: ProColumns<ITableTestPlan>[] = [
         {
             dataIndex: 'index',
@@ -49,6 +72,11 @@ const TablePlan = () => {
                         twoToneColor="#1677ff"
                         style={{ cursor: "pointer", fontSize: '16px' }}
                         onClick={() => navigate(`/plan/${record.id}`)}
+                    />
+                    <DeleteTwoTone
+                        twoToneColor="#ff4d4f" // Danger color for delete
+                        style={{ cursor: "pointer", fontSize: '16px' }}
+                        onClick={() => handleDeleteTestPlan(record.id, record.title)}
                     />
                 </Space>
             ),

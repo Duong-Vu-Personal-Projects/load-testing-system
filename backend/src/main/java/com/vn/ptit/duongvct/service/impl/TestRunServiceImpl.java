@@ -204,6 +204,18 @@ public class TestRunServiceImpl implements TestRunService {
     }
 
     @Override
+    public ArrayList<TestRun> getAllTestRunOfATestPlan(String testPlanId) {
+        return testRunRepository.findByTestPlanId(testPlanId);
+    }
+
+    @Override
+    public void deleteTestRun(TestRun testRun) {
+        TestResults testResults = testRun.getResults();
+        this.testResultService.deleteTestResult(testResults);
+        this.testRunRepository.delete(testRun);
+    }
+
+    @Override
     public TestRun createTestRun(TestRun testRun) {
         return this.testRunRepository.save(testRun);
     }

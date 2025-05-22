@@ -36,6 +36,11 @@ public class TestResultServiceImpl implements TestResultService {
         return convertToDTO(testResults);
     }
 
+    @Override
+    public void deleteTestResult(TestResults testResults) {
+        this.testResultRepository.delete(testResults);
+    }
+
     /**
      * Converts a TestResults entity to a TestResultDTO with arrays for each attribute
      */

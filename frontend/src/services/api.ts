@@ -50,3 +50,7 @@ export const getTestRunOfTestPlanAPI = (id: string, page: number = 1, size: numb
     const urlBackend = `/api/v1/test-run/plan/${id}?page=${page}&size=${size}`;
     return axios.get(urlBackend);
 }
+export const deleteTestPlanAPI = (id: string) => {
+    const urlBackend = `/api/v1/plan/${id}`;
+    return axios.delete(urlBackend);
+}
