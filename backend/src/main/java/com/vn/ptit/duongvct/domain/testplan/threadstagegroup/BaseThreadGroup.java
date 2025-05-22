@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class BaseThreadGroup {
     protected String url;
-    protected boolean isFollowRedirects;
+    protected boolean followRedirects;
     protected int rampDuration;
     protected int holdDuration;
     protected int rampToThreads;

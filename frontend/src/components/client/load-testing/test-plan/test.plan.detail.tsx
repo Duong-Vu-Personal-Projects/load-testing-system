@@ -5,7 +5,7 @@ import {
   Breadcrumb, Descriptions, Collapse, Tag, App
 } from 'antd';
 import { 
-  ArrowLeftOutlined, HistoryOutlined, PlayCircleOutlined
+  ArrowLeftOutlined, EditOutlined, HistoryOutlined, PlayCircleOutlined
 } from '@ant-design/icons';
 import { getTestPlanDetailAPI, runTestPlanAPI } from "../../../../services/api.ts";
 import type {IThreadStageGroup, IRpsThreadStageGroup, ITestPlan} from "../create-test-plan/type.test.plan.tsx";
@@ -148,7 +148,7 @@ const TestPlanDetail: React.FC = () => {
               <Descriptions.Item label="Hold Iterations">{group.holdIteration}</Descriptions.Item>
               <Descriptions.Item label="Throughput Timer">{group.throughputTimer}</Descriptions.Item>
               <Descriptions.Item label="Follow Redirects">
-                {group.isFollowRedirects ? 'Yes' : 'No'}
+                {group.followRedirects ? 'Yes' : 'No'}
               </Descriptions.Item>
             </Descriptions>
           </Panel>
@@ -186,7 +186,7 @@ const TestPlanDetail: React.FC = () => {
               <Descriptions.Item label="Throughput Timer">{group.throughputTimer}</Descriptions.Item>
               <Descriptions.Item label="Max Threads">{group.maxThreads}</Descriptions.Item>
               <Descriptions.Item label="Follow Redirects">
-                {group.isFollowRedirects ? 'Yes' : 'No'}
+                {group.followRedirects ? 'Yes' : 'No'}
               </Descriptions.Item>
             </Descriptions>
           </Panel>
@@ -217,6 +217,12 @@ const TestPlanDetail: React.FC = () => {
             onClick={() => navigate('/plan')}
           >
             Back to Test Plans
+          </Button>
+          <Button
+              icon={<EditOutlined />}
+              onClick={() => navigate(`/plan/edit/${id}`)}
+          >
+          Edit Test Plan
           </Button>
           <Button 
             icon={<HistoryOutlined />}

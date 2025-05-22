@@ -1,5 +1,8 @@
 import createInstanceAxios from "./axios.customize";
-import type {IRequestRunTestPlan} from "../components/client/load-testing/create-test-plan/type.test.plan.tsx";
+import type {
+    IRequestRunTestPlan,
+    ITestPlan
+} from "../components/client/load-testing/create-test-plan/type.test.plan.tsx";
 
 
 const axios = createInstanceAxios(import.meta.env.VITE_BACKEND_URL);
@@ -53,4 +56,8 @@ export const getTestRunOfTestPlanAPI = (id: string, page: number = 1, size: numb
 export const deleteTestPlanAPI = (id: string) => {
     const urlBackend = `/api/v1/plan/${id}`;
     return axios.delete(urlBackend);
+}
+export const editTestPlanAPI = (testPlan: ITestPlan) => {
+    const urlBackend = '/api/v1/plan';
+    return axios.put(urlBackend, testPlan);
 }

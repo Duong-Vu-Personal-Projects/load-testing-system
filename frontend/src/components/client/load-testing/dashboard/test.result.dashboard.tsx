@@ -17,7 +17,6 @@ const TestResultDashboard: React.FC<ITestResultDashboardProps> = ( props:ITestRe
     const [loading, setLoading] = useState<boolean>(true);
     const [testData, setTestData] = useState<ITestResultDetail | null>(null);
     const {testId} = props;
-    // Fetch test result data
     const fetchTestResult = async () => {
         try {
             setLoading(true);

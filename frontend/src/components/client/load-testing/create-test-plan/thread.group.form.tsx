@@ -41,7 +41,7 @@ const ThreadGroupForm: React.FC<IThreadGroupFormProps> = () => {
                                 <Input placeholder="https://example.com/api" />
                             </Form.Item>
                             <Form.Item
-                                name={[name, 'isFollowRedirects']}
+                                name={[name, 'followRedirects']}
                                 label="Follow Redirects"
                                 valuePropName="checked"
                             >

@@ -17,6 +17,7 @@ import TestResultPage from "./pages/client/load-testing/test.result.page.tsx";
 import TestPlanDetail from "./components/client/load-testing/test-plan/test.plan.detail.tsx";
 import TestRunHistory from "./components/client/load-testing/test-plan/test-run-history/test.run.history.tsx";
 import TestRunComparisonPage from "./pages/client/load-testing/test.run.comparision.tsx";
+import EditTestPlanPage from "./pages/client/load-testing/edit.test.plan.page.tsx";
 
 const router = createBrowserRouter(
     [
@@ -73,6 +74,14 @@ const router = createBrowserRouter(
                             element: (
                                 <ProtectedRoute>
                                     <TestRunComparisonPage/>
+                                </ProtectedRoute>
+                            )
+                        },
+                        {
+                            path: '/plan/edit/:id',
+                            element: (
+                                <ProtectedRoute>
+                                    <EditTestPlanPage/>
                                 </ProtectedRoute>
                             )
                         }
