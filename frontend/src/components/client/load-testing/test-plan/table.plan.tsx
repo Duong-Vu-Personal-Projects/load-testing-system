@@ -117,7 +117,7 @@ const TablePlan = () => {
                         key="create"
                         type="primary"
                         icon={<PlusOutlined />}
-                        onClick={() => navigate('/testing/create')}
+                        onClick={() => navigate('/plan/create')}
                     >
                         Create New Test Plan
                     </Button>

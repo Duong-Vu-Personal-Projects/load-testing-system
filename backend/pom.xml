@@ -164,6 +164,7 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version> <!-- Ensure you have a lombok.version property or use a specific version -->
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
@@ -172,6 +173,61 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<layout>ZIP</layout> <!-- or JAR, depending on your preference, ZIP is often used for fat jars -->
+					<requiresUnpack>
+						<dependency>
+							<groupId>us.abstracta.jmeter</groupId>
+							<artifactId>jmeter-java-dsl</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.jmeter</groupId>
+							<artifactId>ApacheJMeter_components</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.jmeter</groupId>
+							<artifactId>ApacheJMeter_config</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.jmeter</groupId>
+							<artifactId>ApacheJMeter_core</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.jmeter</groupId>
+							<artifactId>ApacheJMeter_functions</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.jmeter</groupId>
+							<artifactId>ApacheJMeter_http</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.jmeter</groupId>
+							<artifactId>ApacheJMeter_java</artifactId>
+						</dependency>
+						<!-- Add other JMeter plugins you use directly or indirectly if needed -->
+						<!-- For example, if you use Concurrency Thread Group (though it's often bundled or transitive) -->
+						<dependency>
+							<groupId>kg.apc</groupId>
+							<artifactId>jmeter-plugins-casutg</artifactId>
+						</dependency>
+						<!-- Add any other specific JMeter plugins your test plans might rely on -->
+						<!-- The issue mentions these, include them if they are relevant to your setup -->
+						<dependency>
+							<groupId>kg.apc</groupId>
+							<artifactId>jmeter-plugins-dummy</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>kg.apc</groupId>
+							<artifactId>jmeter-plugins-tst</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>com.blazemeter</groupId>
+							<artifactId>jmeter-plugins-random-csv-data-set</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>com.blazemeter</groupId>
+							<artifactId>jmeter-plugins-wsc</artifactId>
+						</dependency>
+					</requiresUnpack>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>

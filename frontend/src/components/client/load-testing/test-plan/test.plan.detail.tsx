@@ -214,7 +214,7 @@ const TestPlanDetail: React.FC = () => {
         <Space>
           <Button 
             icon={<ArrowLeftOutlined />} 
-            onClick={() => navigate('/testing')}
+            onClick={() => navigate('/plan')}
           >
             Back to Test Plans
           </Button>

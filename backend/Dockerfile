@@ -1,35 +1,44 @@
-FROM eclipse-temurin:21-jdk AS build
+# First stage: Build the application
+FROM eclipse-temurin:21-jdk AS builder
+WORKDIR /app
 
-WORKDIR /workspace/app
-
-# Copy maven executable to the image
+# Copy Maven wrapper and dependencies
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
-
-# Make the mvnw script executable
 RUN chmod +x ./mvnw
 
-# Build all the dependencies in preparation to go offline
+# Build the dependencies first
 RUN ./mvnw dependency:go-offline -B
 
-# Copy the project source
-COPY src src
+# Copy source code
+COPY src ./src
 
-# Package the application
+# Build the project
 RUN ./mvnw package -DskipTests
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
-# Second stage: minimal runtime
+# Second stage: Create a slim runtime image
 FROM eclipse-temurin:21-jre
+WORKDIR /app
 
-VOLUME /tmp
-ARG DEPENDENCY=/workspace/app/target/dependency
+# Copy the build jar from the builder stage
+COPY --from=builder /app/target/*.jar app.jar
 
-# Copy the dependency application file from build stage
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
+# Create required directories
+RUN mkdir -p /app/jmeter/test-plans /app/jmeter/jtls /app/jmeter/jmx /app/jmeter/results
 
-# Set the entry point
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.vn.ptit.duongvct.LoadTestingApplication"]
+# Add a startup script that includes workarounds for JMeter DSL in Docker
+RUN echo '#!/bin/sh\n\
+exec java \
+-Djava.security.properties=/dev/null \
+-Djava.protocol.handler.pkgs=org.springframework.boot.loader \
+-Dloader.path=/app/resources,/app/classes,/app/libs \
+-jar app.jar\
+' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+
+# Set environment variables
+ENV SPRING_PROFILES_ACTIVE=docker
+ENV LANG=C.UTF-8
+
+EXPOSE 8080
+ENTRYPOINT ["/app/entrypoint.sh"]
