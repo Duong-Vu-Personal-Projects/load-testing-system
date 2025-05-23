@@ -11,7 +11,6 @@ import { getTestPlanDetailAPI, runTestPlanAPI } from "../../../../services/api.t
 import type {IThreadStageGroup, IRpsThreadStageGroup, ITestPlan} from "../create-test-plan/type.test.plan.tsx";
 
 const { Title } = Typography;
-const { Panel } = Collapse;
 
 const TestPlanDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

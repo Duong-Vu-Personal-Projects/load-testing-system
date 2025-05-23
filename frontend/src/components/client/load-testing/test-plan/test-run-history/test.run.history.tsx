@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {Table, Card, Button, App, Breadcrumb} from 'antd';
-import { EyeOutlined } from '@ant-design/icons';
+import {DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import {getTestRunOfTestPlanAPI} from "../../../../../services/api.ts";
+import {deleteTestRunAPI, getTestRunOfTestPlanAPI} from "../../../../../services/api.ts";
 
 interface ITestRun {
     id: string;
@@ -15,7 +15,7 @@ interface ITestRun {
 const TestRunHistory: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { notification } = App.useApp();
+    const { notification, modal } = App.useApp();
 
     const [loading, setLoading] = useState<boolean>(true);
     const [testRuns, setTestRuns] = useState<ITestRun[]>([]);
@@ -67,13 +67,22 @@ const TestRunHistory: React.FC = () => {
             title: 'Actions',
             key: 'actions',
             render: (_, record) => (
-                <Button
-                    type="primary"
-                    icon={<EyeOutlined />}
-                    onClick={() => navigate(`/plan/test-run/${record.id}`)}
-                >
-                    View Results
-                </Button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <Button
+                        type="primary"
+                        icon={<EyeOutlined />}
+                        onClick={() => navigate(`/plan/test-run/${record.id}`)}
+                    >
+                        View Results
+                    </Button>
+                    <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDeleteTestRun(record)}
+                    >
+                        Delete
+                    </Button>
+                </div>
             ),
         },
     ];
@@ -112,7 +121,31 @@ const TestRunHistory: React.FC = () => {
     useEffect(() => {
         fetchTestRuns();
     }, [id, pagination.current, pagination.pageSize]);
-
+    const handleDeleteTestRun = (record: ITestRun) => {
+        modal.confirm({
+            title: `Are you sure you want to delete test run "${record.title}"?`,
+            content: 'This action cannot be undone.',
+            okText: 'Delete',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            onOk: async () => {
+                try {
+                    await deleteTestRunAPI(record.id);
+                    notification.success({
+                        message: 'Test Run Deleted',
+                        description: 'The test run has been successfully deleted.'
+                    });
+                    // Refresh the test runs list
+                    fetchTestRuns();
+                } catch (error: any) {
+                    notification.error({
+                        message: 'Failed to Delete Test Run',
+                        description: error.response?.data?.message || error.message || 'An unknown error occurred.'
+                    });
+                }
+            }
+        });
+    };
     return (
         <>
             <Breadcrumb
@@ -134,6 +167,7 @@ const TestRunHistory: React.FC = () => {
             <Card
                 title="Test Run History"
                 extra={
+                <>
                     <Button
                         type="primary"
                         onClick={handleCompare}
@@ -141,6 +175,9 @@ const TestRunHistory: React.FC = () => {
                     >
                         Compare Selected Runs
                     </Button>
+                </>
+
+
                 }
             >
                 <Table

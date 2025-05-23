@@ -1,6 +1,5 @@
 package com.vn.ptit.duongvct.controller;
 
-import com.vn.ptit.duongvct.domain.testplan.TestPlan;
 import com.vn.ptit.duongvct.domain.testplan.testrun.TestRun;
 import com.vn.ptit.duongvct.dto.request.testrun.RequestTestRunDTO;
 import com.vn.ptit.duongvct.dto.response.PaginationResponse;
@@ -54,5 +53,15 @@ public class TestRunController {
             @PathVariable String runId1,
             @PathVariable String runId2) {
         return ResponseEntity.ok(this.testRunComparisonService.compareTestRuns(runId1, runId2));
+    }
+    @DeleteMapping("/{id}")
+    @ApiMessage("Delete a test run")
+    public ResponseEntity<Void> deleteATestRun(@PathVariable String id) {
+        Optional<TestRun> testRunOptional = this.testRunService.findById(id);
+        if (testRunOptional.isEmpty()) {
+            throw new IllegalArgumentException("Test Run with id = " + id + " not found");
+        }
+        this.testRunService.deleteTestRun(testRunOptional.get());
+        return ResponseEntity.ok(null);
     }
 }

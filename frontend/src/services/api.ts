@@ -65,3 +65,7 @@ export const compareTestRunsAPI = (runId1: string, runId2: string) => {
     const urlBackend = `/api/v1/test-run/compare/${runId1}/${runId2}`;
     return axios.get(urlBackend);
 }
+export const deleteTestRunAPI = (id: string) => {
+    const urlBackend = `/api/v1/test-run/${id}`;
+    return axios.delete(urlBackend);
+}
