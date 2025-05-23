@@ -117,7 +117,7 @@ public class TestRunServiceImpl implements TestRunService {
         // Run the test
         TestPlanStats stats = dslTestPlan.run();
         TestRun res = new TestRun();
-        res.setTitle("Run " + count);
+        res.setTitle("Run " + (count + 1));
         res.setTestPlan(testPlan);
         res.setFileName(fileName);
         res.setTime(LocalDateTime.now());

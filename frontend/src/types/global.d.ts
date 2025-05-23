@@ -15,6 +15,7 @@ declare global {
         status: string;
         statusCode: number;
         data?: T;
+        timestamp: string
     }
     interface ILogin {
         access_token: string;

@@ -3,6 +3,11 @@ import type {
     IRequestRunTestPlan,
     ITestPlan
 } from "../components/client/load-testing/create-test-plan/type.test.plan.tsx";
+import type {IBackendRes} from "../types/global";
+import type {
+    IRequestCreateSchedule,
+    IResponseSchedule
+} from "../components/client/load-testing/schedule/type.schedule.tsx";
 
 
 const axios = createInstanceAxios(import.meta.env.VITE_BACKEND_URL);
@@ -69,3 +74,21 @@ export const deleteTestRunAPI = (id: string) => {
     const urlBackend = `/api/v1/test-run/${id}`;
     return axios.delete(urlBackend);
 }
+export const createScheduleAPI = (data: IRequestCreateSchedule) => {
+    return axios.post<IResponseSchedule>("/api/v1/schedule", data);
+};
+
+
+export const getSchedulesByTestPlanAPI = (testPlanId: string, page: number = 1, pageSize: number = 10) => {
+    const urlBackend = `/api/v1/schedule/plan/${testPlanId}?page=${page}&size=${pageSize}`;
+    return axios.get(urlBackend);
+
+};
+
+export const toggleScheduleStatusAPI = (scheduleId: string) => {
+    return axios.put(`/api/v1/schedule/${scheduleId}/toggle`);
+};
+
+export const deleteScheduleAPI = (scheduleId: string) => {
+    return axios.delete(`/api/v1/schedule/${scheduleId}`);
+};
