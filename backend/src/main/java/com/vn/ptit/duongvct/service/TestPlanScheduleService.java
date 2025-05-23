@@ -19,5 +19,5 @@ public interface TestPlanScheduleService {
     ResponseScheduleDTO toggleScheduleStatus(String scheduleId);
     void deleteSchedule(String scheduleId);
     PaginationResponse getSchedulesByTestPlanWithPagination(String testPlanId, Pageable pageable);
-
+    ResponseScheduleDTO mapToResponseScheduleDTO(TestPlanSchedule testPlanSchedule, String testPlanTitle);
 }

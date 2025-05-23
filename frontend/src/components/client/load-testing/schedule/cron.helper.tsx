@@ -9,7 +9,8 @@ interface ICronHelperProps {
     onChange: (cronExpression: string) => void;
 }
 
-const CronHelper: React.FC<ICronHelperProps> = ({ onChange }) => {
+const CronHelper: React.FC<ICronHelperProps> = (props: ICronHelperProps) => {
+    const {onChange} = props;
     const [isVisible, setIsVisible] = useState(false);
     const [frequencyType, setFrequencyType] = useState('daily');
     const [form] = Form.useForm();

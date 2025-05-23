@@ -18,11 +18,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
@@ -42,13 +40,10 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
 
     @Override
     public ResponseScheduleDTO createSchedule(RequestCreateScheduleDTO request) {
-        // Validate test plan exists
         Optional<TestPlan> testPlanOpt = testPlanService.findById(request.getTestPlanId());
         if (testPlanOpt.isEmpty()) {
             throw new IllegalArgumentException("Test plan not found with id: " + request.getTestPlanId());
         }
-
-        // Check if schedule name already exists
         if (scheduleRepository.existsByName(request.getName())) {
             throw new IllegalArgumentException("Schedule name already exists: " + request.getName());
         }
@@ -62,7 +57,6 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         schedule.setUpdatedAt(LocalDateTime.now());
         schedule.setEnabled(true);
 
-        // Set type-specific fields
         if (request.getType() == ScheduleType.ONCE) {
             schedule.setExecutionTime(request.getExecutionTime());
             schedule.setNextRunTime(request.getExecutionTime());
@@ -73,13 +67,7 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
 
         TestPlanSchedule savedSchedule = scheduleRepository.save(schedule);
 
-        // Map to response DTO
-        ResponseScheduleDTO response = mapper.map(savedSchedule, ResponseScheduleDTO.class);
-
-        // Set test plan title for convenience
-        response.setTestPlanTitle(testPlanOpt.get().getTitle());
-
-        return response;
+        return this.mapToResponseScheduleDTO(savedSchedule, testPlanOpt.get().getTitle());
     }
 
     @Override
@@ -90,23 +78,18 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
     @Override
     public ArrayList<ResponseScheduleDTO> getSchedulesByTestPlan(String testPlanId) {
         ArrayList<TestPlanSchedule> schedules = scheduleRepository.findByTestPlanId(testPlanId);
-
-        // Get test plan title (only need to look it up once)
-        String testPlanTitle = "";
         Optional<TestPlan> testPlanOpt = testPlanService.findById(testPlanId);
-        if (testPlanOpt.isPresent()) {
-            testPlanTitle = testPlanOpt.get().getTitle();
+        if (testPlanOpt.isEmpty()) {
+            throw new IllegalArgumentException("Cannot find test plan with id = " + testPlanId);
         }
-
-        final String title = testPlanTitle;
-
+        final String title = testPlanOpt.get().getTitle();
         return new ArrayList<>(schedules.stream()
                 .map(schedule -> {
                     ResponseScheduleDTO response = mapper.map(schedule, ResponseScheduleDTO.class);
                     response.setTestPlanTitle(title);
                     return response;
                 })
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     @Override
@@ -117,34 +100,27 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
     @Override
     public void executeScheduledTest(TestPlanSchedule schedule) {
         try {
-            logger.info("Executing scheduled test: " + schedule.getName());
+            logger.info("Executing scheduled test: {}", schedule.getName());
 
-            // Create request to run test
             RequestTestRunDTO runRequest = new RequestTestRunDTO();
             runRequest.setId(schedule.getTestPlanId());
 
-            // Execute the test
             testRunService.runTestPlan(runRequest);
 
-            // Update last run time
             schedule.setLastRunTime(LocalDateTime.now());
 
-            // Calculate and set next run time based on schedule type
+            // set enabled for once time and calculate next run time for scheduling
             if (schedule.getType() == ScheduleType.ONCE) {
-                // For one-time schedules, disable after running
                 schedule.setEnabled(false);
             } else {
-                // For recurring schedules, calculate next run time
                 LocalDateTime nextRun = calculateNextRunTime(schedule);
                 schedule.setNextRunTime(nextRun);
             }
 
-            // Update the schedule in the database
             scheduleRepository.save(schedule);
-
-            logger.info("Successfully executed scheduled test: " + schedule.getName());
+            logger.info("Successfully executed scheduled test: {}", schedule.getName());
         } catch (Exception e) {
-            logger.error("Failed to execute scheduled test: " + schedule.getName(), e);
+            logger.error("Failed to execute scheduled test: {}", schedule.getName(), e);
         }
     }
 
@@ -173,15 +149,11 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         }
 
         TestPlanSchedule savedSchedule = scheduleRepository.save(schedule);
-
-        // Map to response
-        ResponseScheduleDTO response = mapper.map(savedSchedule, ResponseScheduleDTO.class);
-
-        // Get test plan title
         Optional<TestPlan> testPlanOpt = testPlanService.findById(savedSchedule.getTestPlanId());
-        testPlanOpt.ifPresent(testPlan -> response.setTestPlanTitle(testPlan.getTitle()));
-
-        return response;
+        if (testPlanOpt.isEmpty()) {
+            throw new IllegalArgumentException("Cannot find test plan relate to schedule with id = " + savedSchedule.getTestPlanId());
+        }
+        return this.mapToResponseScheduleDTO(savedSchedule, savedSchedule.getTestPlanId());
     }
 
     @Override
@@ -197,10 +169,8 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         }
         String testPlanTitle = testPlanOpt.get().getTitle();
 
-        // Get paginated schedules
         Page<TestPlanSchedule> pages = scheduleRepository.findPageByTestPlanId(pageable, testPlanId);
 
-        // Create pagination response
         PaginationResponse response = new PaginationResponse();
         PaginationResponse.Meta meta = new PaginationResponse.Meta();
         meta.setPage(pageable.getPageNumber() + 1);
@@ -209,17 +179,23 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         meta.setTotal(pages.getTotalElements());
         response.setMeta(meta);
 
-        // Map to DTOs and set the test plan title
         ArrayList<ResponseScheduleDTO> scheduleDTOs = new ArrayList<>(pages.getContent().stream()
                 .map(schedule -> {
                     ResponseScheduleDTO dto = mapper.map(schedule, ResponseScheduleDTO.class);
                     dto.setTestPlanTitle(testPlanTitle);
                     return dto;
                 })
-                .collect(Collectors.toList()));
+                .toList());
 
         response.setResult(scheduleDTOs);
         return response;
+    }
+
+    @Override
+    public ResponseScheduleDTO mapToResponseScheduleDTO(TestPlanSchedule testPlanSchedule, String testPlanTitle) {
+        ResponseScheduleDTO dto = this.mapper.map(testPlanSchedule, ResponseScheduleDTO.class);
+        dto.setTestPlanTitle(testPlanTitle);
+        return dto;
     }
 
     private LocalDateTime calculateNextRunTime(TestPlanSchedule schedule) {
@@ -232,7 +208,7 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
                 CronExpression cronExpression = CronExpression.parse(schedule.getCronExpression());
                 return cronExpression.next(now);
             } catch (Exception e) {
-                logger.error("Invalid cron expression: " + schedule.getCronExpression(), e);
+                logger.error("Invalid cron expression: {}", schedule.getCronExpression(), e);
                 throw new IllegalArgumentException("Invalid cron expression: " + schedule.getCronExpression());
             }
         }

@@ -3,9 +3,7 @@ import { Button, Card, Space, Tag, Popconfirm, Typography } from 'antd';
 import { ClockCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import {EScheduleType, type ISchedule} from "./type.schedule.tsx";
-import utc from 'dayjs/plugin/utc';
 const { Text } = Typography;
-dayjs.extend(utc);
 interface IScheduleItemProps {
     schedule: ISchedule;
     onDelete: (id: string) => void;

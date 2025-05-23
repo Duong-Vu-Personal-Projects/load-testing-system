@@ -15,13 +15,14 @@ interface IScheduleFormProps {
     confirmLoading: boolean;
 }
 
-const ScheduleForm: React.FC<IScheduleFormProps> = ({
-                                                        testPlanId,
-                                                        visible,
-                                                        onCancel,
-                                                        onSubmit,
-                                                        confirmLoading
-                                                    }) => {
+const ScheduleForm: React.FC<IScheduleFormProps> = (props: IScheduleFormProps) => {
+    const {
+        testPlanId,
+        visible,
+        onCancel,
+        onSubmit,
+        confirmLoading
+    } = props;
     const [form] = Form.useForm();
     const [scheduleType, setScheduleType] = useState<EScheduleType>(EScheduleType.ONCE);
 
@@ -129,6 +130,9 @@ const ScheduleForm: React.FC<IScheduleFormProps> = ({
                         rules={[{ required: true, message: 'Please enter cron expression' }]}
                         extra={
                             <div>
+                                <div>For Cron expression, check <a href={'https://crontab.guru/'}>here</a></div>
+                                <div>But that is the helper for cron job in linux, in backend the cron expression is little different:</div>
+                                <div>Backend needs 6 params, with the first param is seconds</div>
                                 <div>Examples:</div>
                                 <div>- Every day at 8:00 AM: <Text code>0 0 8 * * *</Text></div>
                                 <div>- Every Monday at 9:00 AM: <Text code>0 0 9 * * MON</Text></div>
