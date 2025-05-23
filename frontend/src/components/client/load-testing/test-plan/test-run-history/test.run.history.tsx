@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Table, Card, Button, App } from 'antd';
+import {Table, Card, Button, App, Breadcrumb} from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -114,32 +114,52 @@ const TestRunHistory: React.FC = () => {
     }, [id, pagination.current, pagination.pageSize]);
 
     return (
-        <Card
-            title="Test Run History"
-            extra={
-                <Button
-                    type="primary"
-                    onClick={handleCompare}
-                    disabled={selectedRowKeys.length !== 2}
-                >
-                    Compare Selected Runs
-                </Button>
-            }
-        >
-            <Table
-                rowSelection={rowSelection}
-                columns={columns}
-                dataSource={testRuns}
-                rowKey="id"
-                pagination={{
-                    ...pagination,
-                    showSizeChanger: true,
-                    showTotal: (total) => `Total ${total} items`
-                }}
-                loading={loading}
-                onChange={handleTableChange}
+        <>
+            <Breadcrumb
+                style={{ marginBottom: 16 }}
+                items={
+                    [
+                        {
+                            title: <a onClick={() => navigate('/plan')}>Test Plan</a>
+                        },
+                        {
+                            title: <a onClick={() => navigate(`/plan/${id}`)}>Test Plan Details</a>
+                        },
+                        {
+                            title: 'Edit Test Plan'
+                        }
+                    ]
+                }
             />
-        </Card>
+            <Card
+                title="Test Run History"
+                extra={
+                    <Button
+                        type="primary"
+                        onClick={handleCompare}
+                        disabled={selectedRowKeys.length !== 2}
+                    >
+                        Compare Selected Runs
+                    </Button>
+                }
+            >
+                <Table
+                    rowSelection={rowSelection}
+                    columns={columns}
+                    dataSource={testRuns}
+                    rowKey="id"
+                    pagination={{
+                        ...pagination,
+                        showSizeChanger: true,
+                        showTotal: (total) => `Total ${total} items`
+                    }}
+                    loading={loading}
+                    onChange={handleTableChange}
+                />
+            </Card>
+        </>
+
+
     );
 };
 

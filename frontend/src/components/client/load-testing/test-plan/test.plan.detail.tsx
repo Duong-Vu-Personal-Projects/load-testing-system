@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Card, Spin, Alert, Button, Typography, Space, 
-  Breadcrumb, Descriptions, Collapse, Tag, App
+import {
+  Card, Spin, Alert, Button, Typography, Space,
+  Breadcrumb, Descriptions, Collapse, Tag, App, type CollapseProps
 } from 'antd';
 import { 
   ArrowLeftOutlined, EditOutlined, HistoryOutlined, PlayCircleOutlined
@@ -132,32 +132,31 @@ const TestPlanDetail: React.FC = () => {
       );
     }
 
-    return (
-      <Collapse defaultActiveKey={['0']}>
-        {threadGroups.map((group, index) => (
-          <Panel 
-            header={`Group ${index + 1}: ${group.url}`} 
-            key={index.toString()}
-            extra={<Tag color="blue">{group.rampToThreads} Threads</Tag>}
-          >
-            <Descriptions bordered size="small" column={{ xxl: 3, xl: 3, lg: 2, md: 2, sm: 1, xs: 1 }}>
-              <Descriptions.Item label="URL">{group.url}</Descriptions.Item>
-              <Descriptions.Item label="Threads">{group.rampToThreads}</Descriptions.Item>
-              <Descriptions.Item label="Ramp Duration">{group.rampDuration}s</Descriptions.Item>
-              <Descriptions.Item label="Hold Duration">{group.holdDuration}s</Descriptions.Item>
-              <Descriptions.Item label="Hold Iterations">{group.holdIteration}</Descriptions.Item>
-              <Descriptions.Item label="Throughput Timer">{group.throughputTimer}</Descriptions.Item>
-              <Descriptions.Item label="Follow Redirects">
-                {group.followRedirects ? 'Yes' : 'No'}
-              </Descriptions.Item>
-            </Descriptions>
-          </Panel>
-        ))}
-      </Collapse>
-    );
+    const items: CollapseProps['items'] = threadGroups.map((group, index) => ({
+      key: index.toString(),
+      label: (
+          <span>
+        Group {index + 1}: {group.url} <Tag color="blue">{group.rampToThreads} Threads</Tag>
+      </span>
+      ),
+      children: (
+          <Descriptions bordered size="small" column={{ xxl: 3, xl: 3, lg: 2, md: 2, sm: 1, xs: 1 }}>
+            <Descriptions.Item label="URL">{group.url}</Descriptions.Item>
+            <Descriptions.Item label="Threads">{group.rampToThreads}</Descriptions.Item>
+            <Descriptions.Item label="Ramp Duration">{group.rampDuration}s</Descriptions.Item>
+            <Descriptions.Item label="Hold Duration">{group.holdDuration}s</Descriptions.Item>
+            <Descriptions.Item label="Hold Iterations">{group.holdIteration}</Descriptions.Item>
+            <Descriptions.Item label="Throughput Timer">{group.throughputTimer}</Descriptions.Item>
+            <Descriptions.Item label="Follow Redirects">
+              {group.followRedirects ? 'Yes' : 'No'}
+            </Descriptions.Item>
+          </Descriptions>
+      ),
+    }));
+
+    return <Collapse defaultActiveKey={['0']} items={items} />;
   };
 
-  // Render the RPS thread stage groups details
   const renderRpsGroups = (rpsGroups: IRpsThreadStageGroup[]) => {
     if (!rpsGroups || rpsGroups.length === 0) {
       return (
@@ -169,42 +168,51 @@ const TestPlanDetail: React.FC = () => {
         />
       );
     }
-
+    const items: CollapseProps['items'] = rpsGroups.map((group, index) => ({
+      key: index.toString(),
+      label: (
+          <span>
+        Group {index + 1}: {group.url} <Tag color="green">{group.rampToThreads} RPS</Tag>
+      </span>
+      ),
+      children: (
+          <Descriptions bordered size="small" column={{ xxl: 3, xl: 3, lg: 2, md: 2, sm: 1, xs: 1 }}>
+            <Descriptions.Item label="URL">{group.url}</Descriptions.Item>
+            <Descriptions.Item label="RPS">{group.rampToThreads}</Descriptions.Item>
+            <Descriptions.Item label="Ramp Duration">{group.rampDuration}s</Descriptions.Item>
+            <Descriptions.Item label="Hold Duration">{group.holdDuration}s</Descriptions.Item>
+            <Descriptions.Item label="Throughput Timer">{group.throughputTimer}</Descriptions.Item>
+            <Descriptions.Item label="Max Threads">{group.maxThreads}</Descriptions.Item>
+            <Descriptions.Item label="Follow Redirects">
+              {group.followRedirects ? 'Yes' : 'No'}
+            </Descriptions.Item>
+          </Descriptions>
+      ),
+    }));
     return (
-      <Collapse>
-        {rpsGroups.map((group, index) => (
-          <Panel 
-            header={`Group ${index + 1}: ${group.url}`} 
-            key={index.toString()}
-            extra={<Tag color="green">{group.rampToThreads} RPS</Tag>}
-          >
-            <Descriptions bordered size="small" column={{ xxl: 3, xl: 3, lg: 2, md: 2, sm: 1, xs: 1 }}>
-              <Descriptions.Item label="URL">{group.url}</Descriptions.Item>
-              <Descriptions.Item label="RPS">{group.rampToThreads}</Descriptions.Item>
-              <Descriptions.Item label="Ramp Duration">{group.rampDuration}s</Descriptions.Item>
-              <Descriptions.Item label="Hold Duration">{group.holdDuration}s</Descriptions.Item>
-              <Descriptions.Item label="Throughput Timer">{group.throughputTimer}</Descriptions.Item>
-              <Descriptions.Item label="Max Threads">{group.maxThreads}</Descriptions.Item>
-              <Descriptions.Item label="Follow Redirects">
-                {group.followRedirects ? 'Yes' : 'No'}
-              </Descriptions.Item>
-            </Descriptions>
-          </Panel>
-        ))}
-      </Collapse>
+        <Collapse items={items}/>
     );
   };
 
   return (
     <div className="test-plan-detail">
       {/* Breadcrumb navigation */}
-      <Breadcrumb style={{ marginBottom: 16 }}>
-        <Breadcrumb.Item>
-          <a onClick={() => navigate('/plan')}>Test Plan</a>
-        </Breadcrumb.Item>
-        <Breadcrumb.Item>Test Plan Details</Breadcrumb.Item>
-        <Breadcrumb.Item>{testPlanData.title}</Breadcrumb.Item>
-      </Breadcrumb>
+      <Breadcrumb
+          style={{ marginBottom: 16 }}
+          items={
+            [
+              {
+                title: <a onClick={() => navigate('/plan')}>Test Plan</a>
+              },
+              {
+                title: 'Test Plan Details'
+              },
+              {
+                title: testPlanData.title
+              }
+            ]
+          }
+      />
       
       {/* Header with actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>

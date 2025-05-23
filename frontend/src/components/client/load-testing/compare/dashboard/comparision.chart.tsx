@@ -1,34 +1,32 @@
 import React from 'react';
 import { Card, Typography } from 'antd';
-import type { ITestResultDetail } from "../../create-test-plan/type.test.plan";
 import ResponseTimeComparisonChart from "./response.time.compare.tsx";
 import ThroughputComparisonChart from "./throughput.compare.tsx";
 import ErrorRateComparisonChart from "./error.rate.compare.tsx";
+import type {IComparisonResultDetail} from "../type.compare.tsx";
 
 const { Title, Text } = Typography;
 
 interface IComparisonChartProps {
-    testRun1: ITestResultDetail;
-    testRun2: ITestResultDetail;
+    data: IComparisonResultDetail;
     metric: 'responseTime' | 'throughput' | 'errorRate';
 }
 
 const ComparisonChart: React.FC<IComparisonChartProps> = (props: IComparisonChartProps) => {
-    const {testRun1, testRun2, metric} = props;
+    const {data, metric} = props;
     if (metric === 'responseTime') {
         return <ResponseTimeComparisonChart
-            testRun1 = {testRun1}
-            testRun2 = {testRun2}
+            responseTimeComparison = {data.responseTimeComparison}
         />
     } else if (metric === 'throughput') {
         return <ThroughputComparisonChart
-            testRun1 = {testRun1}
-            testRun2 = {testRun2}
+            throughputComparison={data.throughputComparison}
             />
     } else if (metric === 'errorRate') {
         return <ErrorRateComparisonChart
-            testRun1 = {testRun1}
-            testRun2 = {testRun2}
+            testRun1 = {data.testRun1}
+            testRun2 = {data.testRun2}
+            errorRateComparison={data.errorRateComparison}
             />
     }
 

@@ -1,8 +1,8 @@
-import type {ITestResultDetail} from "../../create-test-plan/type.test.plan.tsx";
 import {Card, Descriptions} from "antd";
 import dayjs from "dayjs";
+import type {ITestRunBasicInfo} from "../type.compare.tsx";
 interface ITestRun {
-    testRun: ITestResultDetail
+    testRun: ITestRunBasicInfo
 }
 const TestRunCompareDetail = (props: ITestRun) => {
     const {testRun} = props;

@@ -7,11 +7,6 @@ import {
     ExclamationOutlined,
     HomeOutlined,
     LoginOutlined,
-    LineChartOutlined,
-    HistoryOutlined,
-    PlayCircleOutlined,
-    FileTextOutlined,
-    DashboardOutlined, PlusCircleFilled
 } from "@ant-design/icons";
 import {useState} from "react";
 

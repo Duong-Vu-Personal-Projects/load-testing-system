@@ -10,16 +10,22 @@ const EditTestPlanPage: React.FC = () => {
     return (
         <div style={{ padding: '20px' }}>
             {/* Breadcrumb navigation */}
-            <Breadcrumb style={{ marginBottom: 16 }}>
-                <Breadcrumb.Item>
-                    <a onClick={() => navigate('/plan')}>Test Plans</a>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>
-                    <a onClick={() => navigate(`/plan/${id}`)}>Test Plan Details</a>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>Edit Test Plan</Breadcrumb.Item>
-            </Breadcrumb>
-
+            <Breadcrumb
+                style={{ marginBottom: 16 }}
+                items={
+                    [
+                        {
+                            title: <a onClick={() => navigate('/plan')}>Test Plan</a>
+                        },
+                        {
+                            title: <a onClick={() => navigate(`/plan/${id}`)}>Test Plan Details</a>
+                        },
+                        {
+                            title: 'Edit Test Plan'
+                        }
+                    ]
+                }
+            />
             {/* Edit Test Plan Component */}
             <EditTestPlan />
         </div>

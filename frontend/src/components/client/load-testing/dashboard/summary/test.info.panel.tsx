@@ -8,7 +8,6 @@ interface ITestInfoPanelProps {
 }
 const TestInfoPanel: React.FC<ITestInfoPanelProps> = (props: ITestInfoPanelProps) => {
     const {testData} = props;
-    console.log("Test Info Panel", testData);
     return (
         <Card>
             <Title level={2}>
@@ -47,7 +46,7 @@ const TestInfoPanel: React.FC<ITestInfoPanelProps> = (props: ITestInfoPanelProps
                         Iterations: {group.holdIteration} |
                         Ramp-up: {group.rampDuration}s |
                         Hold: {group.holdDuration}s |
-                        Follow Redirects: {group.isFollowRedirects ? 'Yes' : 'No'}
+                        Follow Redirects: {group.followRedirects ? 'Yes' : 'No'}
                     </Descriptions.Item>
                 ))}
 

@@ -1,8 +1,38 @@
-import type {ITestResultDetail} from "../create-test-plan/type.test.plan.tsx";
+import type {ITestResultStats} from "../create-test-plan/type.test.plan.tsx";
+export interface IComparisonResultDetail {
+    testRun1: ITestRunBasicInfo;
+    testRun2: ITestRunBasicInfo;
+    testPlanId: string;
+    responseTimeComparison: IComparisonDataPoint[];
+    throughputComparison: IComparisonDataPoint[];
+    errorRateComparison: IErrorRateComparison;
 
+}
+export interface ITestRunBasicInfo {
+    id: string;
+    title: string;
+    time: string;
+    fileName: string;
+    stats: ITestResultStats;
+}
+export interface IComparisonDataPoint {
+    category: string;
+    run: string;
+    value: number
+}
+export interface IErrorRateComparison {
+    run1ErrorRate: number;
+    run2ErrorRate: number;
+    run1Data: IPieChartData[];
+    run2Data: IPieChartData[];
+}
+export interface IPieChartData{
+    type: string;
+    value: number;
+}
 export interface ICompareTestRun {
-    testRun1: ITestResultDetail;
-    testRun2: ITestResultDetail;
+    testRun1: ITestRunBasicInfo;
+    testRun2: ITestRunBasicInfo;
 }
 export const calculateDifference = (value1: number, value2: number): { value: number, improved: boolean } => {
     if (value1 === 0 && value2 === 0) return { value: 0, improved: false };

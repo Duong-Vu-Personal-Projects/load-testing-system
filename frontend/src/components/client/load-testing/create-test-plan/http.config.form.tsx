@@ -2,7 +2,6 @@ import React from 'react';
 import { Form, Select, Switch, Space, Collapse, Input, Button } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 
-const { Panel } = Collapse;
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -12,6 +11,68 @@ interface IHttpConfigFormProps {
 }
 
 const HttpConfigForm: React.FC<IHttpConfigFormProps> = ({ showBodyInput, onHttpMethodChange }) => {
+    const items = [
+        {
+            key: 'headers',
+            label: 'HTTP Headers',
+            children: (
+                <Form.List name="headers">
+                    {(fields, { add, remove }) => (
+                        <>
+                            {fields.map(({ key, name, ...restField }) => (
+                                <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                                    <Form.Item
+                                        {...restField}
+                                        name={[name, 'key']}
+                                        rules={[{ required: true, message: 'Header name is required' }]}
+                                    >
+                                        <Input placeholder="Header Name" />
+                                    </Form.Item>
+                                    <Form.Item
+                                        {...restField}
+                                        name={[name, 'value']}
+                                        rules={[{ required: true, message: 'Header value is required' }]}
+                                    >
+                                        <Input placeholder="Header Value" />
+                                    </Form.Item>
+                                    <DeleteOutlined onClick={() => remove(name)} />
+                                </Space>
+                            ))}
+                            <Form.Item>
+                                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                    Add Header
+                                </Button>
+                            </Form.Item>
+                        </>
+                    )}
+                </Form.List>
+            ),
+        },
+        ...(showBodyInput
+            ? [
+                {
+                    key: 'body',
+                    label: 'Request Body',
+                    children: (
+                        <>
+                            <Form.Item name="contentType" label="Content Type">
+                                <Select style={{ width: 200 }}>
+                                    <Option value="application/json">JSON</Option>
+                                    <Option value="application/x-www-form-urlencoded">Form URL Encoded</Option>
+                                    <Option value="text/plain">Plain Text</Option>
+                                    <Option value="application/xml">XML</Option>
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item name="requestBody" label="Body">
+                                <TextArea rows={6} placeholder="Enter request body here" />
+                            </Form.Item>
+                        </>
+                    ),
+                },
+            ]
+            : []),
+    ];
     return (
         <>
             <Space style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -38,58 +99,7 @@ const HttpConfigForm: React.FC<IHttpConfigFormProps> = ({ showBodyInput, onHttpM
                     <Switch />
                 </Form.Item>
             </Space>
-
-            <Collapse defaultActiveKey={[]}>
-                <Panel header="HTTP Headers" key="headers">
-                    <Form.List name="headers">
-                        {(fields, { add, remove }) => (
-                            <>
-                                {fields.map(({ key, name, ...restField }) => (
-                                    <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                                        <Form.Item
-                                            {...restField}
-                                            name={[name, 'key']}
-                                            rules={[{ required: true, message: 'Header name is required' }]}
-                                        >
-                                            <Input placeholder="Header Name" />
-                                        </Form.Item>
-                                        <Form.Item
-                                            {...restField}
-                                            name={[name, 'value']}
-                                            rules={[{ required: true, message: 'Header value is required' }]}
-                                        >
-                                            <Input placeholder="Header Value" />
-                                        </Form.Item>
-                                        <DeleteOutlined onClick={() => remove(name)} />
-                                    </Space>
-                                ))}
-                                <Form.Item>
-                                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                        Add Header
-                                    </Button>
-                                </Form.Item>
-                            </>
-                        )}
-                    </Form.List>
-                </Panel>
-
-                {showBodyInput && (
-                    <Panel header="Request Body" key="body">
-                        <Form.Item name="contentType" label="Content Type">
-                            <Select style={{ width: 200 }}>
-                                <Option value="application/json">JSON</Option>
-                                <Option value="application/x-www-form-urlencoded">Form URL Encoded</Option>
-                                <Option value="text/plain">Plain Text</Option>
-                                <Option value="application/xml">XML</Option>
-                            </Select>
-                        </Form.Item>
-
-                        <Form.Item name="requestBody" label="Body">
-                            <TextArea rows={6} placeholder="Enter request body here" />
-                        </Form.Item>
-                    </Panel>
-                )}
-            </Collapse>
+            <Collapse defaultActiveKey={[]} items={items} />;
         </>
     );
 };

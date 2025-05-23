@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Row, Col, Divider, Typography, Button, Alert, Spin, App } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import type { ITestResultDetail } from '../create-test-plan/type.test.plan';
-import { getTestResultByIdAPI } from '../../../../services/api';
+import {compareTestRunsAPI } from '../../../../services/api';
 import ComparisonChart from "./dashboard/comparision.chart.tsx";
 import MedianResponseTimeComparison from "./metrics/median.response.time.tsx";
 import Percentile90Comparison from "./metrics/percentile.90.tsx";
@@ -12,6 +11,7 @@ import TotalRequestComparison from "./metrics/total.request.tsx";
 import ErrorRateComparison from "./metrics/error.rate.compare.tsx";
 import TestDurationComparison from "./metrics/test.duration.compare.tsx";
 import TestRunCompareDetail from "./metrics/test.run.compare.detail.tsx";
+import type {IComparisonResultDetail} from "./type.compare.tsx";
 
 
 const { Title } = Typography;
@@ -21,58 +21,42 @@ interface ITestRunComparisonProps {
     runId2: string;
 }
 
-const TestRunComparison: React.FC<ITestRunComparisonProps> = ({ runId1, runId2 }) => {
+const TestRunComparison: React.FC<ITestRunComparisonProps> = (props: ITestRunComparisonProps) => {
+    const {runId1, runId2} = props;
     const navigate = useNavigate();
     const { notification } = App.useApp();
-    const [loading1, setLoading1] = useState<boolean>(true);
-    const [loading2, setLoading2] = useState<boolean>(true);
-    const [testRun1, setTestRun1] = useState<ITestResultDetail | null>(null);
-    const [testRun2, setTestRun2] = useState<ITestResultDetail | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [comparisonData, setComparisonData] = useState<IComparisonResultDetail | null>(null);
 
     useEffect(() => {
-        const fetchTestRunData = async () => {
+        const fetchComparisonData = async () => {
             try {
-                setLoading1(true);
-                setLoading2(true);
+                setLoading(true);
+                const response = await compareTestRunsAPI(runId1, runId2);
 
-                const [response1, response2] = await Promise.all([
-                    getTestResultByIdAPI(runId1),
-                    getTestResultByIdAPI(runId2)
-                ]);
-
-                if (response1.data) {
-                    setTestRun1(response1.data);
+                if (response.data) {
+                    setComparisonData(response.data);
                 } else {
                     notification.error({
-                        message: 'Failed to load first test run',
-                        description: 'Could not retrieve test run data'
-                    });
-                }
-
-                if (response2.data) {
-                    setTestRun2(response2.data);
-                } else {
-                    notification.error({
-                        message: 'Failed to load second test run',
-                        description: 'Could not retrieve test run data'
+                        message: 'Failed to load comparison data',
+                        description: response.message || 'Unknown error'
                     });
                 }
             } catch (error: any) {
                 notification.error({
-                    message: 'Error loading test run data',
+                    message: 'Error loading comparison data',
                     description: error.message || 'An unknown error occurred'
                 });
             } finally {
-                setLoading1(false);
-                setLoading2(false);
+                setLoading(false);
             }
         };
 
-        fetchTestRunData();
+        fetchComparisonData();
     }, [runId1, runId2, notification]);
 
 
-    if (loading1 || loading2) {
+    if (loading) {
         return (
             <div style={{ textAlign: 'center', padding: '50px 0' }}>
                 <Spin size="large" />
@@ -81,19 +65,18 @@ const TestRunComparison: React.FC<ITestRunComparisonProps> = ({ runId1, runId2 }
         );
     }
 
-    if (!testRun1 || !testRun2) {
+    if (!comparisonData) {
         return (
             <Alert
-                message="Test Run Data Not Available"
-                description="One or both of the selected test runs could not be loaded."
+                message="Comparison Data Not Available"
+                description="Could not load comparison data for the selected test runs."
                 type="error"
                 showIcon
             />
         );
     }
-
-    const planId = testRun1.testPlan.id;
-
+    const planId = comparisonData.testPlanId;
+    const {testRun1, testRun2} = comparisonData;
     return (
         <div className="test-run-comparison">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -153,8 +136,7 @@ const TestRunComparison: React.FC<ITestRunComparisonProps> = ({ runId1, runId2 }
 
             {/* Response Time Chart */}
             <ComparisonChart
-                testRun1={testRun1}
-                testRun2={testRun2}
+                data={comparisonData}
                 metric="responseTime"
             />
 
@@ -162,15 +144,13 @@ const TestRunComparison: React.FC<ITestRunComparisonProps> = ({ runId1, runId2 }
             <Row gutter={16} style={{ marginTop: 16 }}>
                 <Col span={12}>
                     <ComparisonChart
-                        testRun1={testRun1}
-                        testRun2={testRun2}
+                        data={comparisonData}
                         metric="throughput"
                     />
                 </Col>
                 <Col span={12}>
                     <ComparisonChart
-                        testRun1={testRun1}
-                        testRun2={testRun2}
+                        data={comparisonData}
                         metric="errorRate"
                     />
                 </Col>

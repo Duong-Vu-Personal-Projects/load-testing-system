@@ -10,7 +10,6 @@ import HttpConfigForm from "../create-test-plan/http.config.form";
 import RpsThreadGroupForm from "../create-test-plan/rps.thread.group.form";
 
 const { Title } = Typography;
-const { TabPane } = Tabs;
 
 const EditTestPlan: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -118,7 +117,18 @@ const EditTestPlan: React.FC = () => {
             </Card>
         );
     }
-
+    const tabItems = [
+        {
+            key: 'threadGroups',
+            label: 'Thread Stage Groups',
+            children: <ThreadGroupForm />,
+        },
+        {
+            key: 'rpsGroups',
+            label: 'RPS Thread Stage Groups',
+            children: <RpsThreadGroupForm />,
+        },
+    ];
     return (
         <Card title={<Title level={3}>Edit Test Plan</Title>}>
             <Form
@@ -133,15 +143,7 @@ const EditTestPlan: React.FC = () => {
                 <Divider orientation="left">Load Configuration</Divider>
 
                 {/* Thread Groups Tabs */}
-                <Tabs activeKey={activeTab} onChange={setActiveTab}>
-                    <TabPane tab="Thread Stage Groups" key="threadGroups">
-                        <ThreadGroupForm />
-                    </TabPane>
-
-                    <TabPane tab="RPS Thread Stage Groups" key="rpsGroups">
-                        <RpsThreadGroupForm />
-                    </TabPane>
-                </Tabs>
+                <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
 
                 <Divider orientation="left">HTTP Request Configuration</Divider>
 

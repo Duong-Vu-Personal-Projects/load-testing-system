@@ -25,23 +25,15 @@ const ErrorChart: React.FC<IErrorChartProps> = (props: IErrorChartProps) => {
 
     // Chart configuration
     const config = {
-        data,
+        data: data,
         angleField: 'value',
         colorField: 'type',
         radius: 0.8,
         color: ['#52c41a', '#f5222d'],
         label: {
-            type: 'outer',
-            // Fix: Define the parameter types properly and handle undefined case
-            content: ({ name, percent }: { name?: string; percent?: number }) => {
-                return `${name || ''}: ${percent ? (percent * 100).toFixed(1) : 0}%`;
-            },
-        },
-        interactions: [
-            {
-                type: 'element-active',
-            },
-        ],
+            text: 'value',
+            position: 'outside',
+        }
     };
 
     return (

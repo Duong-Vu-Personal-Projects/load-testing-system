@@ -13,14 +13,22 @@ const TestResultPage: React.FC = () => {
     return (
         <div className="test-result-page" style={{ padding: '20px' }}>
             {/* Breadcrumb navigation */}
-            <Breadcrumb style={{ marginBottom: 16 }}>
-                <Breadcrumb.Item>
-                    <a onClick={() => navigate('/plan')}>Test Plan</a>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>Test Results</Breadcrumb.Item>
-                <Breadcrumb.Item>{id}</Breadcrumb.Item>
-            </Breadcrumb>
-
+            <Breadcrumb
+                style={{ marginBottom: 16 }}
+                items={
+                [
+                    {
+                        title: <a onClick={() => navigate('/plan')}>Test Plan</a>
+                    },
+                    {
+                        title: 'Test Results'
+                    },
+                    {
+                        title: id
+                    }
+                ]
+            }
+            />
             {/* Page title */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <Title level={2}>Test Result Dashboard</Title>

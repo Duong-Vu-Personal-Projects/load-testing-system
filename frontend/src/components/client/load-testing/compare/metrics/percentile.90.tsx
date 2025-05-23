@@ -1,6 +1,5 @@
 import {Card, Col, Row, Statistic, Typography} from "antd";
 import {calculateDifference, type ICompareTestRun} from "../type.compare.tsx";
-
 const Percentile90Comparison = (props: ICompareTestRun) => {
     const {Text} = Typography;
     const {testRun1, testRun2} = props;
