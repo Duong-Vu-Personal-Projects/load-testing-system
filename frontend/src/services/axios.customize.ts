@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Mutex } from "async-mutex";
+import {Mutex} from "async-mutex";
 
 const mutex = new Mutex();
 
@@ -22,8 +22,7 @@ const createInstanceAxios = (baseURL: string) => {
     instance.interceptors.request.use(function (config) {
         // Do something before request is sent
         const token = localStorage.getItem("access_token");
-        const auth = token ? `Bearer ${token}` : '';
-        config.headers["Authorization"] = auth;
+        config.headers["Authorization"] = token ? `Bearer ${token}` : '';
 
         return config;
     }, function (error) {

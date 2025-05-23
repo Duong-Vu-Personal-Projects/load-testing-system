@@ -171,7 +171,20 @@ services:
   #     JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS: 8640000
   #     JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS: 8640000
   #     SPRING_PROFILES_ACTIVE: docker
-  #     LOGSTASH_HOST: logstash:5000
+  #     LOGSTASH_HOST: logstash:50000
+  #     SPRING_GROOVY_TEMPLATE_CHECK_TEMPLATE_LOCATION: false
+  #     SPRING_THYMELEAF_CHECK_TEMPLATE_LOCATION: false
+  #     SPRING_FREEMARKER_CHECK_TEMPLATE_LOCATION: false
+  #     SPRING_GROOVY_TEMPLATE_ENABLED: false
+  #     SPRING_THYMELEAF_ENABLED: false
+  #     SPRING_FREEMARKER_ENABLED: false
+      
+  #     # Fix JarFileSystem issue
+  #     SPRING_JMX_ENABLED: false
+  #     SPRING_MAIN_CLOUD_PLATFORM: NONE
+      
+  #     # Add JVM options for FileSystemProvider issues
+  #     JAVA_TOOL_OPTIONS: -Djava.security.properties=/dev/null
   #   depends_on:
   #     - mongodb
   #     - elasticsearch
@@ -217,11 +230,11 @@ services:
     depends_on:
       - prometheus
   # jmeter:
-  #   image: justb4/jmeter:5.6.3
+  #   image: justb4/jmeter:5.5
   #   container_name: jmeter
   #   volumes:
-  #     - ./jmeter/test-plans:/test-plans
-  #     - ./jmeter/results:/results
+  #     - ./backend/jmeter/test-plans:/test-plans
+  #     - ./backend/jmeter/results:/results
   #   environment:
   #     - TZ=UTC+7
   #   networks:
@@ -237,13 +250,18 @@ services:
   #   volumes:
   #     - ./frontend:/app  # For development only (remove in production)
   #     - /app/node_modules # Don't mount node_modules
+  #     - ./backend/jmeter:/app/jmeter
   #   environment:
-  #     - NODE_ENV=development  # Change to production for production builds
-  #     - VITE_API_URL=http://localhost:8080  # Backend API URL
-  #     - VITE_KIBANA_URL=http://localhost:5601  # Kibana URL
-  #     - VITE_GRAFANA_URL=http://localhost:3000  # Grafana URL
+  #     # - NODE_ENV=development  # Change to production for production builds
+  #     VITE_API_URL: http://localhost:8080  # Backend API URL
+  #     VITE_KIBANA_URL: http://localhost:5601  # Kibana URL
+  #     VITE_GRAFANA_URL: http://localhost:3000  # Grafana URL
+  #     JAVA_TOOL_OPTIONS: >
+  #       -Djava.security.properties=/dev/null
+  #       -Djava.protocol.handler.pkgs=org.springframework.boot.loader
+  #       -Dloader.path=/app/resources,/app/classes,/app/libs
   #   depends_on:
-  #     # - backend  # Uncomment when backend is enabled
+  #     - backend  # Uncomment when backend is enabled
   #     - mongodb
   #   networks:
   #     - elk

@@ -1,5 +1,14 @@
 export { };
 declare global {
+    interface IModelPaginate<T> {
+        meta: {
+            current: number;
+            pageSize: number;
+            pages: number;
+            total: number;
+        },
+        result: T[]
+    }
     interface IBackendRes<T> {
         error?: string | string[];
         message: string;
@@ -33,5 +42,11 @@ declare global {
 
     interface IFetchAccount {
         user: IUser
+    }
+    interface IMeta {
+        page: number,
+        pageSize: number,
+        pages: number,
+        total: number
     }
 }

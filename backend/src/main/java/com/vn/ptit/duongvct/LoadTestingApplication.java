@@ -2,10 +2,11 @@ package com.vn.ptit.duongvct;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.groovy.template.GroovyTemplateAutoConfiguration;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = { GroovyTemplateAutoConfiguration.class }, proxyBeanMethods = false)
 @EnableMongoRepositories(basePackages = "com.vn.ptit.duongvct.repository.mongo")
 @EnableElasticsearchRepositories(basePackages = "com.vn.ptit.duongvct.repository.search")
 public class LoadTestingApplication {

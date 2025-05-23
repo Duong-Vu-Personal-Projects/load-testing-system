@@ -8,8 +8,6 @@ interface IProps {
 const ProtectedRoute = (props: IProps) => {
     const {user, isAuthenticated} = useCurrentApp();
     const location = useLocation();
-    console.log(user);
-    console.log(isAuthenticated);
     if (!isAuthenticated) {
         return (
             <Result
