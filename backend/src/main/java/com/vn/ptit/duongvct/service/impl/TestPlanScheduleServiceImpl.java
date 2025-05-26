@@ -53,8 +53,8 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         schedule.setName(request.getName());
         schedule.setType(request.getType());
         schedule.setDescription(request.getDescription());
-        schedule.setCreatedAt(LocalDateTime.now());
-        schedule.setUpdatedAt(LocalDateTime.now());
+//        schedule.setCreatedAt(LocalDateTime.now());
+//        schedule.setUpdatedAt(LocalDateTime.now());
         schedule.setEnabled(true);
 
         if (request.getType() == ScheduleType.ONCE) {
@@ -141,7 +141,7 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
 
         TestPlanSchedule schedule = scheduleOpt.get();
         schedule.setEnabled(!schedule.isEnabled());
-        schedule.setUpdatedAt(LocalDateTime.now());
+//        schedule.setUpdatedAt(LocalDateTime.now());
 
         // If enabling and it's a recurring schedule, recalculate next run time
         if (schedule.isEnabled() && schedule.getType() == ScheduleType.RECURRING) {

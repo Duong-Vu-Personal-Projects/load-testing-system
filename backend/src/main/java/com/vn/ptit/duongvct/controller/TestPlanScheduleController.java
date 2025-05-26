@@ -5,6 +5,7 @@ import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.schedule.ResponseScheduleDTO;
 import com.vn.ptit.duongvct.service.TestPlanScheduleService;
 import com.vn.ptit.duongvct.util.annotation.ApiMessage;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class TestPlanScheduleController {
 
     @PostMapping
     @ApiMessage("Create a new test plan schedule")
-    public ResponseEntity<ResponseScheduleDTO> createSchedule(@RequestBody RequestCreateScheduleDTO request) {
+    public ResponseEntity<ResponseScheduleDTO> createSchedule(@RequestBody @Valid RequestCreateScheduleDTO request) {
         ResponseScheduleDTO schedule = scheduleService.createSchedule(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(schedule);
     }
