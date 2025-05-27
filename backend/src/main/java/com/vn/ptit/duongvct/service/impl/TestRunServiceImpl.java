@@ -13,6 +13,7 @@ import com.vn.ptit.duongvct.dto.response.testplan.testrun.ResponseTableTestRunDT
 import com.vn.ptit.duongvct.dto.response.testplan.testrun.ResponseTestRunDetailDTO;
 import com.vn.ptit.duongvct.repository.mongo.TestPlanRepository;
 import com.vn.ptit.duongvct.repository.mongo.TestRunRepository;
+import com.vn.ptit.duongvct.repository.search.TestRunSearchRepository;
 import com.vn.ptit.duongvct.service.TestResultService;
 import com.vn.ptit.duongvct.service.TestRunService;
 import com.vn.ptit.duongvct.util.JTLParser;
@@ -46,13 +47,16 @@ public class TestRunServiceImpl implements TestRunService {
     private final TestRunRepository testRunRepository;
     private final TestResultService testResultService;
     private final TestPlanRepository testPlanRepository;
+    private final TestRunSearchRepository testRunSearchRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(TestRunServiceImpl.class);
 
-    public TestRunServiceImpl(ModelMapper mapper, TestRunRepository testRunRepository, TestResultService testResultService, TestPlanRepository testPlanRepository) {
+    public TestRunServiceImpl(ModelMapper mapper, TestRunRepository testRunRepository, TestResultService testResultService, TestPlanRepository testPlanRepository, TestRunSearchRepository testRunSearchRepository) {
         this.mapper = mapper;
         this.testRunRepository = testRunRepository;
         this.testResultService = testResultService;
         this.testPlanRepository = testPlanRepository;
+        this.testRunSearchRepository = testRunSearchRepository;
     }
 
     @Override
@@ -236,6 +240,7 @@ public class TestRunServiceImpl implements TestRunService {
             logger.info("Deleting test run: {}", testRun.getId());
             TestResults testResults = testRun.getResults();
             this.testResultService.deleteTestResult(testResults);
+            this.testRunSearchRepository.delete(testRun);
             this.testRunRepository.delete(testRun);
             logger.info("Test run deleted: {}", testRun.getId());
         } finally {
@@ -248,6 +253,7 @@ public class TestRunServiceImpl implements TestRunService {
         MDC.put("testRunId", testRun.getId() != null ? testRun.getId() : "new");
         try {
             logger.debug("Creating test run for plan: {}", testRun.getTestPlan().getTitle());
+            this.testRunSearchRepository.save(testRun);
             TestRun savedRun = this.testRunRepository.save(testRun);
             logger.info("Created test run with ID: {}", savedRun.getId());
             return savedRun;

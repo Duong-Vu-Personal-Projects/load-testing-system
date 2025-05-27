@@ -8,6 +8,7 @@ import com.vn.ptit.duongvct.dto.request.testrun.RequestTestRunDTO;
 import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.schedule.ResponseScheduleDTO;
 import com.vn.ptit.duongvct.repository.mongo.TestPlanScheduleRepository;
+import com.vn.ptit.duongvct.repository.search.TestPlanScheduleSearchRepository;
 import com.vn.ptit.duongvct.service.TestPlanScheduleService;
 import com.vn.ptit.duongvct.service.TestPlanService;
 import com.vn.ptit.duongvct.service.TestRunService;
@@ -25,13 +26,14 @@ import java.util.Optional;
 @Service
 public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
     private static final Logger logger = LoggerFactory.getLogger(TestPlanScheduleServiceImpl.class);
-
+    private final TestPlanScheduleSearchRepository scheduleSearchRepository;
     private final TestPlanScheduleRepository scheduleRepository;
     private final TestPlanService testPlanService;
     private final TestRunService testRunService;
     private final ModelMapper mapper;
 
-    public TestPlanScheduleServiceImpl(TestPlanScheduleRepository scheduleRepository, TestPlanService testPlanService, TestRunService testRunService, ModelMapper mapper) {
+    public TestPlanScheduleServiceImpl(TestPlanScheduleSearchRepository scheduleSearchRepository, TestPlanScheduleRepository scheduleRepository, TestPlanService testPlanService, TestRunService testRunService, ModelMapper mapper) {
+        this.scheduleSearchRepository = scheduleSearchRepository;
         this.scheduleRepository = scheduleRepository;
         this.testPlanService = testPlanService;
         this.testRunService = testRunService;
@@ -64,7 +66,7 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
             schedule.setCronExpression(request.getCronExpression());
             schedule.setNextRunTime(calculateNextRunTime(schedule));
         }
-
+        this.scheduleSearchRepository.save(schedule);
         TestPlanSchedule savedSchedule = scheduleRepository.save(schedule);
 
         return this.mapToResponseScheduleDTO(savedSchedule, testPlanOpt.get().getTitle());
@@ -116,7 +118,7 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
                 LocalDateTime nextRun = calculateNextRunTime(schedule);
                 schedule.setNextRunTime(nextRun);
             }
-
+            scheduleSearchRepository.save(schedule);
             scheduleRepository.save(schedule);
             logger.info("Successfully executed scheduled test: {}", schedule.getName());
         } catch (Exception e) {
@@ -129,6 +131,7 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         if (schedule.getType() == ScheduleType.RECURRING) {
             schedule.setNextRunTime(calculateNextRunTime(schedule));
             scheduleRepository.save(schedule);
+            scheduleSearchRepository.save(schedule);
         }
     }
 
@@ -149,6 +152,7 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         }
 
         TestPlanSchedule savedSchedule = scheduleRepository.save(schedule);
+        scheduleSearchRepository.save(schedule);
         Optional<TestPlan> testPlanOpt = testPlanService.findById(savedSchedule.getTestPlanId());
         if (testPlanOpt.isEmpty()) {
             throw new IllegalArgumentException("Cannot find test plan relate to schedule with id = " + savedSchedule.getTestPlanId());
@@ -158,6 +162,7 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
 
     @Override
     public void deleteSchedule(String scheduleId) {
+        scheduleSearchRepository.deleteById(scheduleId);
         scheduleRepository.deleteById(scheduleId);
     }
 

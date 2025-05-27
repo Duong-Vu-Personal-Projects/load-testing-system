@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, Button, Card, Divider, Typography, App, Tabs, Spin } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -19,7 +19,7 @@ const EditTestPlan: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [fetchingData, setFetchingData] = useState<boolean>(true);
     const [activeTab, setActiveTab] = useState<string>('threadGroups');
-
+    const originalTestPlanRef = useRef<ITestPlan | null>(null);
     useEffect(() => {
         const fetchTestPlanData = async () => {
             if (!id) return;
@@ -30,15 +30,12 @@ const EditTestPlan: React.FC = () => {
 
                 if (response.data) {
                     const testPlan = response.data;
+                    originalTestPlanRef.current = testPlan;
                     form.setFieldsValue({
                         title: testPlan.title,
                         threadStageGroups: testPlan.threadStageGroups || [],
                         rpsThreadStageGroups: testPlan.rpsThreadStageGroups || [],
                     });
-
-                    if (testPlan.threadStageGroups?.length > 0) {
-                        const method = testPlan.threadStageGroups[0].httpMethod;
-                    }
                 } else {
                     notification.error({
                         message: "Failed to get test plan detail",
@@ -59,16 +56,16 @@ const EditTestPlan: React.FC = () => {
     }, [id, form]);
 
     const onFinish = async (values: ITestPlanFormValues) => {
-        if (!id) return;
+        if (!id || !originalTestPlanRef.current) return;
 
         try {
             setLoading(true);
-            // Prepare the request payload
+            const formValues = form.getFieldsValue();
             const testPlan: ITestPlan = {
                 id: id,
                 title: values.title,
-                threadStageGroups: values.threadStageGroups || [],
-                rpsThreadStageGroups: values.rpsThreadStageGroups || []
+                threadStageGroups: formValues.threadStageGroups || originalTestPlanRef.current.threadStageGroups || [],
+                rpsThreadStageGroups: formValues.rpsThreadStageGroups || originalTestPlanRef.current.rpsThreadStageGroups || []
             };
 
             const response = await editTestPlanAPI(testPlan);

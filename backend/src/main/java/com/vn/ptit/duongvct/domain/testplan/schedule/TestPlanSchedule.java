@@ -9,7 +9,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "test_plan_schedules")
 @Document(collection = "test_plan_schedules")
 @Getter
 @Setter
