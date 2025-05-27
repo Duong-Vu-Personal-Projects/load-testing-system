@@ -5,7 +5,6 @@ import type {IRequestCreateTestPlan, ITestPlanFormValues} from "./type.test.plan
 import {createTestPlanAPI} from "../../../../services/api.ts";
 import TestPlanHeader from './test.plan.header.tsx';
 import ThreadGroupForm from './thread.group.form.tsx';
-import HttpConfigForm from "./http.config.form.tsx";
 import RpsThreadGroupForm from "./rps.thread.group.form.tsx";
 import {useNavigate} from "react-router-dom";
 
@@ -25,18 +24,8 @@ const CreateTestPlan: React.FC = () => {
   };
   const [form] = Form.useForm<ITestPlanFormValues>();
   const [loading, setLoading] = useState(false);
-  const [showBodyInput, setShowBodyInput] = useState(false);
   const [activeTab, setActiveTab] = useState('threadGroups');
   const navigate = useNavigate();
-
-  const onHttpMethodChange = (value: string) => {
-    const showBody = ['POST', 'PUT', 'PATCH'].includes(value);
-    setShowBodyInput(showBody);
-
-    if (!showBody) {
-      form.setFieldsValue({ requestBody: '' });
-    }
-  };
 
   const onFinish = async (values: ITestPlanFormValues) => {
     try {
@@ -96,14 +85,6 @@ const CreateTestPlan: React.FC = () => {
               <RpsThreadGroupForm />
             </TabPane>
           </Tabs>
-
-          <Divider orientation="left">HTTP Request Configuration</Divider>
-
-          {/* HTTP Configuration */}
-          <HttpConfigForm
-              showBodyInput={showBodyInput}
-              onHttpMethodChange={onHttpMethodChange}
-          />
 
           <Form.Item style={{ marginTop: 24 }}>
             <Button

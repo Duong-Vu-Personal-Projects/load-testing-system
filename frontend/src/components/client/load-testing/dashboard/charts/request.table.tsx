@@ -10,8 +10,7 @@ interface IRequestsTableProps {
     resultDTO: ITestResultDTO;
 }
 
-// Define a record type for type safety
-interface Record {
+interface IRecord {
     key: number;
     timeStamp: number;
     elapsed: number;
@@ -33,9 +32,8 @@ interface Record {
 const RequestsTable: React.FC<IRequestsTableProps> = (props: IRequestsTableProps) => {
     const [searchText, setSearchText] = useState<string>('');
     const { resultDTO } = props;
-    
-    // Create records from arrays
-    const records: Record[] = resultDTO.timeStamps.map((timestamp, index) => ({
+
+    const records: IRecord[] = resultDTO.timeStamps.map((timestamp, index) => ({
         key: index,
         timeStamp: timestamp,
         elapsed: resultDTO.elapsedTimes[index],
@@ -55,7 +53,7 @@ const RequestsTable: React.FC<IRequestsTableProps> = (props: IRequestsTableProps
     }));
 
     // Define columns for the table
-    const columns: ColumnsType<Record> = [
+    const columns: ColumnsType<IRecord> = [
         {
             title: 'Status',
             dataIndex: 'success',
@@ -84,7 +82,6 @@ const RequestsTable: React.FC<IRequestsTableProps> = (props: IRequestsTableProps
             dataIndex: 'label',
             key: 'label',
             width: 150,
-            // Remove the 'filterable' property and use filters + onFilter instead
             filters: Array.from(new Set(records.map(r => r.label))).map(label => ({
                 text: label,
                 value: label,
@@ -191,7 +188,7 @@ const RequestsTable: React.FC<IRequestsTableProps> = (props: IRequestsTableProps
                 pagination={{
                     pageSize: 10,
                     showSizeChanger: true,
-                    pageSizeOptions: ['10', '20', '50', '100'],
+                    pageSizeOptions: ['10'],
                     showTotal: (total, range) =>
                         `${range[0]}-${range[1]} of ${total} requests`,
                 }}

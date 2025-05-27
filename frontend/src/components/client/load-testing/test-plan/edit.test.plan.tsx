@@ -6,7 +6,6 @@ import type { ITestPlan, ITestPlanFormValues } from "../create-test-plan/type.te
 import { editTestPlanAPI, getTestPlanDetailAPI } from "../../../../services/api";
 import TestPlanHeader from '../create-test-plan/test.plan.header';
 import ThreadGroupForm from '../create-test-plan/thread.group.form';
-import HttpConfigForm from "../create-test-plan/http.config.form";
 import RpsThreadGroupForm from "../create-test-plan/rps.thread.group.form";
 
 const { Title } = Typography;
@@ -19,7 +18,6 @@ const EditTestPlan: React.FC = () => {
 
     const [loading, setLoading] = useState<boolean>(false);
     const [fetchingData, setFetchingData] = useState<boolean>(true);
-    const [showBodyInput, setShowBodyInput] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<string>('threadGroups');
 
     useEffect(() => {
@@ -40,7 +38,6 @@ const EditTestPlan: React.FC = () => {
 
                     if (testPlan.threadStageGroups?.length > 0) {
                         const method = testPlan.threadStageGroups[0].httpMethod;
-                        setShowBodyInput(['POST', 'PUT', 'PATCH'].includes(method || ''));
                     }
                 } else {
                     notification.error({
@@ -60,15 +57,6 @@ const EditTestPlan: React.FC = () => {
 
         fetchTestPlanData();
     }, [id, form]);
-
-    const onHttpMethodChange = (value: string) => {
-        const showBody = ['POST', 'PUT', 'PATCH'].includes(value);
-        setShowBodyInput(showBody);
-
-        if (!showBody) {
-            form.setFieldsValue({ requestBody: '' });
-        }
-    };
 
     const onFinish = async (values: ITestPlanFormValues) => {
         if (!id) return;
@@ -144,14 +132,6 @@ const EditTestPlan: React.FC = () => {
 
                 {/* Thread Groups Tabs */}
                 <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
-
-                <Divider orientation="left">HTTP Request Configuration</Divider>
-
-                {/* HTTP Configuration */}
-                <HttpConfigForm
-                    showBodyInput={showBodyInput}
-                    onHttpMethodChange={onHttpMethodChange}
-                />
 
                 <Form.Item style={{ marginTop: 24 }}>
                     <Button

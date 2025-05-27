@@ -7,14 +7,9 @@ const { Title } = Typography;
 interface ILatencyDistributionProps {
     latencies: number[];
 }
-
-/**
- * Displays a pie chart showing the distribution of latencies across ranges
- */
 const LatencyDistribution: React.FC<ILatencyDistributionProps> = (props: ILatencyDistributionProps) => {
     const {latencies} = props;
     const data = useMemo(() => {
-        // Define latency range buckets
         const buckets = {
             '0-100ms': 0,
             '100-500ms': 0,
@@ -24,7 +19,6 @@ const LatencyDistribution: React.FC<ILatencyDistributionProps> = (props: ILatenc
             '5s+': 0
         };
 
-        // Count latencies in each bucket
         latencies.forEach(latency => {
             if (latency < 100) buckets['0-100ms']++;
             else if (latency < 500) buckets['100-500ms']++;

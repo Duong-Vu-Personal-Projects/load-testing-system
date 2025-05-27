@@ -15,7 +15,7 @@ const ThreadGroupForm: React.FC<IThreadGroupFormProps> = () => {
         rampToThreads: 5,
         throughputTimer: 0,
         holdIteration: 2,
-        isFollowRedirects: true
+        followRedirects: true
     };
 
     return (

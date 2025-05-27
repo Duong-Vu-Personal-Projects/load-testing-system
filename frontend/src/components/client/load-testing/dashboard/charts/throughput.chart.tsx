@@ -5,12 +5,8 @@ import { Column } from '@ant-design/plots';
 const { Title } = Typography;
 
 interface IThroughputChartProps {
-    throughputData: Array<number[]>; // [time, requestCount] pairs
+    throughputData: Array<number[]>; // [time, requestCount]
 }
-
-/**
- * Displays a column chart of throughput (requests per second)
- */
 const ThroughputChart: React.FC<IThroughputChartProps> = (props: IThroughputChartProps) => {
     const {throughputData} = props;
     const data = throughputData.map(([time, count]) => ({
@@ -18,7 +14,6 @@ const ThroughputChart: React.FC<IThroughputChartProps> = (props: IThroughputChar
         throughput: count
     }));
 
-    // Chart configuration
     const config = {
         data,
         xField: 'time',

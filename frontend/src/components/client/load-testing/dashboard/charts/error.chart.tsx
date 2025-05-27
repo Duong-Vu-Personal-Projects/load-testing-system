@@ -9,21 +9,14 @@ interface IErrorChartProps {
     errorCounts: number;
 }
 
-/**
- * Displays a pie chart showing success vs error rates
- */
 const ErrorChart: React.FC<IErrorChartProps> = (props: IErrorChartProps) => {
     const {successCounts, errorCounts} = props;
     const total = successCounts + errorCounts;
     const successRate = total > 0 ? (successCounts / total) * 100 : 0;
-
-    // Data for the chart
     const data = [
         { type: 'Success', value: successCounts },
         { type: 'Error', value: errorCounts }
     ];
-
-    // Chart configuration
     const config = {
         data: data,
         angleField: 'value',

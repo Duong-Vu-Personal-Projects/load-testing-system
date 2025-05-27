@@ -14,7 +14,7 @@ const RpsThreadGroupForm: React.FC<IRpsThreadGroupFormProps> = () => {
         rampToThreads: 10,
         throughputTimer: 0,
         maxThreads: 5,
-        isFollowRedirects: true
+        followRedirects: true
     };
 
     return (
@@ -40,7 +40,7 @@ const RpsThreadGroupForm: React.FC<IRpsThreadGroupFormProps> = () => {
                                 <Input placeholder="https://example.com/api" />
                             </Form.Item>
                             <Form.Item
-                                name={[name, 'isFollowRedirects']}
+                                name={[name, 'followRedirects']}
                                 label="Follow Redirects"
                                 valuePropName="checked"
                             >
