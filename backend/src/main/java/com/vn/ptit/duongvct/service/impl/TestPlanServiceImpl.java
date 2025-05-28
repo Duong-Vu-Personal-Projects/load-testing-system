@@ -100,4 +100,15 @@ public class TestPlanServiceImpl implements TestPlanService {
         result.setMeta(meta);
         return result;
     }
+
+    @Override
+    public PaginationResponse searchTestPlans(String keyword, Pageable pageable) {
+        Page<TestPlan> pages = this.testPlanSearchRepository.findByTitleCustom(keyword, pageable);
+        PaginationResponse res = setPaginationResponse(pageable, pages);
+        ArrayList<ResponseTableTestPlanDTO> list = new ArrayList<>(pages.getContent().stream().map(
+                testPlan -> this.mapper.map(testPlan, ResponseTableTestPlanDTO.class)
+        ).toList());
+        res.setResult(list);
+        return res;
+    }
 }

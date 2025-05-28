@@ -92,3 +92,36 @@ export const toggleScheduleStatusAPI = (scheduleId: string) => {
 export const deleteScheduleAPI = (scheduleId: string) => {
     return axios.delete(`/api/v1/schedule/${scheduleId}`);
 };
+export const searchTestPlansAPI = (query: string, page: number = 1, pageSize: number = 10) => {
+    return axios.get(`/api/v1/search/test-plans?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`);
+};
+
+// export const advancedSearchTestPlans = (query: string, page: number = 1, pageSize: number = 10) => {
+//     return axios.get(`/api/v1/search/test-plans/advanced?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`);
+// };
+
+// Test Run search methods
+export const searchTestRunsAPI = (query: string, page: number = 1, pageSize: number = 10) => {
+    return axios.get(`/api/v1/search/test-runs?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`);
+};
+
+export const searchTestRunsByDateRangeAPI = (start: string, end: string, page: number = 1, pageSize: number = 10) => {
+    return axios.get(`/api/v1/search/test-runs/by-date?start=${start}&end=${end}&page=${page}&size=${pageSize}`);
+};
+
+export const searchTestRunsByErrorRateAPI = (minErrorRate: number, page: number = 1, pageSize: number = 10) => {
+    return axios.get(`/api/v1/search/test-runs/by-error-rate?minErrorRate=${minErrorRate}&page=${page}&size=${pageSize}`);
+};
+
+// Schedule search methods
+export const searchSchedulesAPI = (query: string, page: number = 1, pageSize: number = 10) => {
+    return axios.get(`/api/v1/search/schedules?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`);
+};
+
+export const searchSchedulesByStatusAPI = (enabled: boolean, page: number = 1, pageSize: number = 10) => {
+    return axios.get(`/api/v1/search/schedules/by-status?enabled=${enabled}&page=${page}&size=${pageSize}`);
+};
+
+export const searchSchedulesByExecutionTimeAPI = (start: string, end: string, page: number = 1, pageSize: number = 10) => {
+    return axios.get(`/api/v1/search/schedules/by-execution-time?start=${start}&end=${end}&page=${page}&size=${pageSize}`);
+};

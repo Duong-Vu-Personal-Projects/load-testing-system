@@ -203,6 +203,81 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         return dto;
     }
 
+    @Override
+    public PaginationResponse searchSchedulesByName(String name, Pageable pageable) {
+        Page<TestPlanSchedule> pages = this.scheduleSearchRepository.findByNameContainingIgnoreCase(name, pageable);
+
+        PaginationResponse response = new PaginationResponse();
+        PaginationResponse.Meta meta = new PaginationResponse.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(pages.getTotalPages());
+        meta.setTotal(pages.getTotalElements());
+        response.setMeta(meta);
+
+        ArrayList<ResponseScheduleDTO> scheduleDTOs = new ArrayList<>(pages.getContent().stream()
+                .map(schedule -> {
+                    // Get test plan title for each schedule
+                    Optional<TestPlan> testPlanOpt = testPlanService.findById(schedule.getTestPlanId());
+                    String testPlanTitle = testPlanOpt.isPresent() ? testPlanOpt.get().getTitle() : "Unknown";
+                    return mapToResponseScheduleDTO(schedule, testPlanTitle);
+                })
+                .toList());
+
+        response.setResult(scheduleDTOs);
+        return response;
+    }
+
+    @Override
+    public PaginationResponse searchSchedulesByStatus(boolean enabled, Pageable pageable) {
+        Page<TestPlanSchedule> pages = this.scheduleSearchRepository.findByEnabled(enabled, pageable);
+
+        PaginationResponse response = new PaginationResponse();
+        PaginationResponse.Meta meta = new PaginationResponse.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(pages.getTotalPages());
+        meta.setTotal(pages.getTotalElements());
+        response.setMeta(meta);
+
+        ArrayList<ResponseScheduleDTO> scheduleDTOs = new ArrayList<>(pages.getContent().stream()
+                .map(schedule -> {
+                    // Get test plan title for each schedule
+                    Optional<TestPlan> testPlanOpt = testPlanService.findById(schedule.getTestPlanId());
+                    String testPlanTitle = testPlanOpt.isPresent() ? testPlanOpt.get().getTitle() : "Unknown";
+                    return mapToResponseScheduleDTO(schedule, testPlanTitle);
+                })
+                .toList());
+
+        response.setResult(scheduleDTOs);
+        return response;
+    }
+
+    @Override
+    public PaginationResponse searchSchedulesByNextRunTime(LocalDateTime start, LocalDateTime end, Pageable pageable) {
+        Page<TestPlanSchedule> pages = this.scheduleSearchRepository.findByNextRunTimeBetween(start, end, pageable);
+
+        PaginationResponse response = new PaginationResponse();
+        PaginationResponse.Meta meta = new PaginationResponse.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(pages.getTotalPages());
+        meta.setTotal(pages.getTotalElements());
+        response.setMeta(meta);
+
+        ArrayList<ResponseScheduleDTO> scheduleDTOs = new ArrayList<>(pages.getContent().stream()
+                .map(schedule -> {
+                    // Get test plan title for each schedule
+                    Optional<TestPlan> testPlanOpt = testPlanService.findById(schedule.getTestPlanId());
+                    String testPlanTitle = testPlanOpt.isPresent() ? testPlanOpt.get().getTitle() : "Unknown";
+                    return mapToResponseScheduleDTO(schedule, testPlanTitle);
+                })
+                .toList());
+
+        response.setResult(scheduleDTOs);
+        return response;
+    }
+
     private LocalDateTime calculateNextRunTime(TestPlanSchedule schedule) {
         LocalDateTime now = LocalDateTime.now();
 

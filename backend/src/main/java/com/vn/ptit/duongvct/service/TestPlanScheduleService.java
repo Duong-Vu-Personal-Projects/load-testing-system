@@ -6,6 +6,7 @@ import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.schedule.ResponseScheduleDTO;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -20,4 +21,11 @@ public interface TestPlanScheduleService {
     void deleteSchedule(String scheduleId);
     PaginationResponse getSchedulesByTestPlanWithPagination(String testPlanId, Pageable pageable);
     ResponseScheduleDTO mapToResponseScheduleDTO(TestPlanSchedule testPlanSchedule, String testPlanTitle);
+    PaginationResponse searchSchedulesByName(String name, Pageable pageable);
+
+    // Search schedules by status (enabled/disabled)
+    PaginationResponse searchSchedulesByStatus(boolean enabled, Pageable pageable);
+
+    // Search schedules by next execution time
+    PaginationResponse searchSchedulesByNextRunTime(LocalDateTime start, LocalDateTime end, Pageable pageable);
 }
