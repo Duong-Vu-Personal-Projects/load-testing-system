@@ -20,15 +20,8 @@ public interface TestRunService {
     public TestRun createTestRun(TestRun testRun);
     public ResponseTestRunDetailDTO mapTestRunToResult(TestRun testRun);
     public Optional<TestRun> findById(String id);
-    PaginationResponse getAllTestRunOfTestPlan(Pageable pageable, String testPlanId);
-    ArrayList<ResponseTableTestRunDTO> getAllTestRunOfTestPlan(String testPlanId);
+    PaginationResponse getAllTestRunOfTestPlan(Pageable pageable, String testPlanId,
+                                               String title, LocalDateTime startDate, LocalDateTime endDate);
     ArrayList<TestRun> getAllTestRunOfATestPlan(String testPlanId);
     public void deleteTestRun(TestRun testRun);
-    PaginationResponse searchTestRunsByTitle(String title, Pageable pageable);
-
-    // Search test runs by date range
-    PaginationResponse searchTestRunsByTimeRange(LocalDateTime start, LocalDateTime end, Pageable pageable);
-
-    // Search problematic test runs with high error rates
-    PaginationResponse searchTestRunsByErrorRate(double minErrorRate, Pageable pageable);
 }

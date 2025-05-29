@@ -29,7 +29,6 @@ public class SearchController {
         this.scheduleService = scheduleService;
     }
 
-    // Test Plan search endpoints
     @GetMapping("/test-plans")
     @ApiMessage("Search test plans by title")
     public ResponseEntity<PaginationResponse> searchTestPlans(
@@ -38,63 +37,4 @@ public class SearchController {
         return ResponseEntity.ok(testPlanService.searchTestPlans(q, pageable));
     }
 
-//    @GetMapping("/test-plans/advanced")
-//    @ApiMessage("Advanced search for test plans")
-//    public ResponseEntity<PaginationResponse> advancedSearchTestPlans(
-//            @RequestParam String q,
-//            Pageable pageable) {
-//        return ResponseEntity.ok(testPlanService.advancedSearchTestPlans(q, pageable));
-//    }
-
-    // Test Run search endpoints
-    @GetMapping("/test-runs")
-    @ApiMessage("Search test runs by title")
-    public ResponseEntity<PaginationResponse> searchTestRuns(
-            @RequestParam String q,
-            Pageable pageable) {
-        return ResponseEntity.ok(testRunService.searchTestRunsByTitle(q, pageable));
-    }
-
-    @GetMapping("/test-runs/by-date")
-    @ApiMessage("Search test runs by date range")
-    public ResponseEntity<PaginationResponse> searchTestRunsByDate(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
-            Pageable pageable) {
-        return ResponseEntity.ok(testRunService.searchTestRunsByTimeRange(start, end, pageable));
-    }
-
-    @GetMapping("/test-runs/by-error-rate")
-    @ApiMessage("Search test runs by minimum error rate")
-    public ResponseEntity<PaginationResponse> searchTestRunsByErrorRate(
-            @RequestParam double minErrorRate,
-            Pageable pageable) {
-        return ResponseEntity.ok(testRunService.searchTestRunsByErrorRate(minErrorRate, pageable));
-    }
-
-    // Schedule search endpoints
-    @GetMapping("/schedules")
-    @ApiMessage("Search schedules by name")
-    public ResponseEntity<PaginationResponse> searchSchedules(
-            @RequestParam String q,
-            Pageable pageable) {
-        return ResponseEntity.ok(scheduleService.searchSchedulesByName(q, pageable));
-    }
-
-    @GetMapping("/schedules/by-status")
-    @ApiMessage("Search schedules by status")
-    public ResponseEntity<PaginationResponse> searchSchedulesByStatus(
-            @RequestParam boolean enabled,
-            Pageable pageable) {
-        return ResponseEntity.ok(scheduleService.searchSchedulesByStatus(enabled, pageable));
-    }
-
-    @GetMapping("/schedules/by-execution-time")
-    @ApiMessage("Search schedules by execution time range")
-    public ResponseEntity<PaginationResponse> searchSchedulesByExecutionTime(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
-            Pageable pageable) {
-        return ResponseEntity.ok(scheduleService.searchSchedulesByNextRunTime(start, end, pageable));
-    }
 }

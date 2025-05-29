@@ -48,7 +48,6 @@ public class TestRunServiceImpl implements TestRunService {
     private final TestResultService testResultService;
     private final TestPlanRepository testPlanRepository;
     private final TestRunSearchRepository testRunSearchRepository;
-
     private static final Logger logger = LoggerFactory.getLogger(TestRunServiceImpl.class);
 
     public TestRunServiceImpl(ModelMapper mapper, TestRunRepository testRunRepository, TestResultService testResultService, TestPlanRepository testPlanRepository, TestRunSearchRepository testRunSearchRepository) {
@@ -194,14 +193,18 @@ public class TestRunServiceImpl implements TestRunService {
     }
 
     @Override
-    public PaginationResponse getAllTestRunOfTestPlan(Pageable pageable, String testPlanId) {
+    public PaginationResponse getAllTestRunOfTestPlan(Pageable pageable, String testPlanId,
+                                                      String title, LocalDateTime startDate, LocalDateTime endDate) {
         Optional<TestPlan> testPlanOptional = testPlanRepository.findById(testPlanId);
         if (testPlanOptional.isEmpty()) {
             throw new IllegalArgumentException("Test plan with id = " + testPlanId + " not found");
         }
-
-        Page<TestRun> pages = testRunRepository.findPagesByTestPlanId(pageable, testPlanId);
-
+        Page<TestRun> pages;
+        if (title != null || startDate != null || endDate != null) {
+            pages = testRunRepository.findByTestPlanIdWithFlexibleCriteria(testPlanId, startDate, endDate, pageable);
+        } else {
+            pages = testRunSearchRepository.findByTestPlanId(testPlanId, pageable);
+        }
 
         PaginationResponse response = new PaginationResponse();
         PaginationResponse.Meta meta = new PaginationResponse.Meta();
@@ -211,7 +214,6 @@ public class TestRunServiceImpl implements TestRunService {
         meta.setTotal(pages.getTotalElements());
         response.setMeta(meta);
 
-
         List<ResponseTableTestRunDTO> testRunDTOs = pages.getContent().stream()
                 .map(testRun -> mapper.map(testRun, ResponseTableTestRunDTO.class))
                 .collect(Collectors.toList());
@@ -219,15 +221,6 @@ public class TestRunServiceImpl implements TestRunService {
         response.setResult(testRunDTOs);
         return response;
     }
-
-    @Override
-    public ArrayList<ResponseTableTestRunDTO> getAllTestRunOfTestPlan(String testPlanId) {
-        ArrayList<TestRun> testRuns = testRunRepository.findByTestPlanId(testPlanId);
-        return new ArrayList<>(testRuns.stream()
-                .map(testRun -> mapper.map(testRun, ResponseTableTestRunDTO.class))
-                .collect(Collectors.toList()));
-    }
-
     @Override
     public ArrayList<TestRun> getAllTestRunOfATestPlan(String testPlanId) {
         return testRunRepository.findByTestPlanId(testPlanId);
@@ -246,66 +239,6 @@ public class TestRunServiceImpl implements TestRunService {
         } finally {
             MDC.remove("testRunId");
         }
-    }
-
-    @Override
-    public PaginationResponse searchTestRunsByTitle(String title, Pageable pageable) {
-        Page<TestRun> pages = this.testRunSearchRepository.findByTitleContainingIgnoreCase(title, pageable);
-
-        PaginationResponse response = new PaginationResponse();
-        PaginationResponse.Meta meta = new PaginationResponse.Meta();
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pages.getTotalPages());
-        meta.setTotal(pages.getTotalElements());
-        response.setMeta(meta);
-
-        List<ResponseTableTestRunDTO> testRunDTOs = pages.getContent().stream()
-                .map(testRun -> mapper.map(testRun, ResponseTableTestRunDTO.class))
-                .collect(Collectors.toList());
-
-        response.setResult(testRunDTOs);
-        return response;
-    }
-
-    @Override
-    public PaginationResponse searchTestRunsByTimeRange(LocalDateTime start, LocalDateTime end, Pageable pageable) {
-        Page<TestRun> pages = this.testRunSearchRepository.findByTimeBetween(start, end, pageable);
-
-        PaginationResponse response = new PaginationResponse();
-        PaginationResponse.Meta meta = new PaginationResponse.Meta();
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pages.getTotalPages());
-        meta.setTotal(pages.getTotalElements());
-        response.setMeta(meta);
-
-        List<ResponseTableTestRunDTO> testRunDTOs = pages.getContent().stream()
-                .map(testRun -> mapper.map(testRun, ResponseTableTestRunDTO.class))
-                .collect(Collectors.toList());
-
-        response.setResult(testRunDTOs);
-        return response;
-    }
-
-    @Override
-    public PaginationResponse searchTestRunsByErrorRate(double minErrorRate, Pageable pageable) {
-        Page<TestRun> pages = this.testRunSearchRepository.findByErrorRateGreaterThan(minErrorRate, pageable);
-
-        PaginationResponse response = new PaginationResponse();
-        PaginationResponse.Meta meta = new PaginationResponse.Meta();
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pages.getTotalPages());
-        meta.setTotal(pages.getTotalElements());
-        response.setMeta(meta);
-
-        List<ResponseTableTestRunDTO> testRunDTOs = pages.getContent().stream()
-                .map(testRun -> mapper.map(testRun, ResponseTableTestRunDTO.class))
-                .collect(Collectors.toList());
-
-        response.setResult(testRunDTOs);
-        return response;
     }
 
     @Override

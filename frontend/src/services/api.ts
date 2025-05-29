@@ -1,9 +1,9 @@
 import createInstanceAxios from "./axios.customize";
 import type {
+    IRequestCreateTestPlan,
     IRequestRunTestPlan,
     ITestPlan
 } from "../components/client/load-testing/create-test-plan/type.test.plan.tsx";
-import type {IBackendRes} from "../types/global";
 import type {
     IRequestCreateSchedule,
     IResponseSchedule
@@ -31,7 +31,7 @@ export const logoutAPI = () => {
     const urlBackend = "/api/v1/auth/logout";
     return axios.post<IBackendRes<IRegister>>(urlBackend);
 }
-export const createTestPlanAPI = (requestPayload: IRequestTestPlan) => {
+export const createTestPlanAPI = (requestPayload: IRequestCreateTestPlan) => {
     const urlBackend = "/api/v1/plan";
     return axios.post(urlBackend, requestPayload);
 }
@@ -96,32 +96,25 @@ export const searchTestPlansAPI = (query: string, page: number = 1, pageSize: nu
     return axios.get(`/api/v1/search/test-plans?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`);
 };
 
-// export const advancedSearchTestPlans = (query: string, page: number = 1, pageSize: number = 10) => {
-//     return axios.get(`/api/v1/search/test-plans/advanced?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`);
-// };
+export const getTestRunsOfTestPlanWithSearchAPI = (
+    testPlanId: string,
+    page: number = 1,
+    pageSize: number = 10,
+    title?: string,
+    startDate?: string,
+    endDate?: string
+) => {
+    let url = `/api/v1/test-run/plan/${testPlanId}?page=${page}&size=${pageSize}`;
 
-// Test Run search methods
-export const searchTestRunsAPI = (query: string, page: number = 1, pageSize: number = 10) => {
-    return axios.get(`/api/v1/search/test-runs?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`);
-};
+    if (title && title.trim()) {
+        url += `&title=${encodeURIComponent(title.trim())}`;
+    }
+    if (startDate) {
+        url += `&startDate=${encodeURIComponent(startDate)}`;
+    }
+    if (endDate) {
+        url += `&endDate=${encodeURIComponent(endDate)}`;
+    }
 
-export const searchTestRunsByDateRangeAPI = (start: string, end: string, page: number = 1, pageSize: number = 10) => {
-    return axios.get(`/api/v1/search/test-runs/by-date?start=${start}&end=${end}&page=${page}&size=${pageSize}`);
-};
-
-export const searchTestRunsByErrorRateAPI = (minErrorRate: number, page: number = 1, pageSize: number = 10) => {
-    return axios.get(`/api/v1/search/test-runs/by-error-rate?minErrorRate=${minErrorRate}&page=${page}&size=${pageSize}`);
-};
-
-// Schedule search methods
-export const searchSchedulesAPI = (query: string, page: number = 1, pageSize: number = 10) => {
-    return axios.get(`/api/v1/search/schedules?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`);
-};
-
-export const searchSchedulesByStatusAPI = (enabled: boolean, page: number = 1, pageSize: number = 10) => {
-    return axios.get(`/api/v1/search/schedules/by-status?enabled=${enabled}&page=${page}&size=${pageSize}`);
-};
-
-export const searchSchedulesByExecutionTimeAPI = (start: string, end: string, page: number = 1, pageSize: number = 10) => {
-    return axios.get(`/api/v1/search/schedules/by-execution-time?start=${start}&end=${end}&page=${page}&size=${pageSize}`);
+    return axios.get(url);
 };

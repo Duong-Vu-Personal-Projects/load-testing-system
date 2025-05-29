@@ -45,7 +45,7 @@ declare global {
         user: IUser
     }
     interface IMeta {
-        page: number,
+        page: number|null,
         pageSize: number,
         pages: number,
         total: number

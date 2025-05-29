@@ -20,7 +20,7 @@ services:
     build:
       context: ./docker-elk/setup/
       args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION:-9.0.1}
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
     init: true
     volumes:
       - ./docker-elk/setup/entrypoint.sh:/entrypoint.sh:ro,Z
@@ -44,7 +44,7 @@ services:
     build:
       context: ./docker-elk/elasticsearch/
       args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION:-9.0.1}
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
       - ./docker-elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
       - ./docker-elk/elasticsearch/elasticsearch_data:/usr/share/elasticsearch/data:Z
@@ -69,7 +69,7 @@ services:
     build:
       context: ./docker-elk/logstash/
       args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION:-9.0.1}
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
       - ./docker-elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
       - ./docker-elk/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
@@ -91,7 +91,7 @@ services:
     build:
       context: ./docker-elk/kibana/
       args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION:-9.0.1}
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
       - ./docker-elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
     ports:

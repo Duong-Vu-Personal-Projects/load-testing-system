@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import {deleteTestPlanAPI, getAllTestPlanWithPagination, searchTestPlansAPI} from "../../../../services/api.ts";
-import {SearchBar} from "../../../share/search.bar.tsx";
+import {SearchBar} from "../../../shared/search.bar.tsx";
 
 interface ITableTestPlan {
     id: string;
