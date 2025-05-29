@@ -118,3 +118,28 @@ export const getTestRunsOfTestPlanWithSearchAPI = (
 
     return axios.get(url);
 };
+export const searchSchedulesByNameAPI = (
+    testPlanId: string,
+    query: string,
+    page: number = 1,
+    pageSize: number = 10
+) => {
+    return axios.get(`/api/v1/search/schedules?testPlanId=${testPlanId}&q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`);
+};
+export const searchSchedulesByStatusAPI = (
+    testPlanId: string,
+    enabled: boolean,
+    page: number = 1,
+    pageSize: number = 10
+) => {
+    return axios.get(`/api/v1/search/schedules/by-status?testPlanId=${testPlanId}&enabled=${enabled}&page=${page}&size=${pageSize}`);
+};
+export const searchSchedulesByExecutionTimeAPI = (
+    testPlanId: string,
+    start: string,
+    end: string,
+    page: number = 1,
+    pageSize: number = 10
+) => {
+    return axios.get(`/api/v1/search/schedules/by-execution-time?testPlanId=${testPlanId}&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&page=${page}&size=${pageSize}`);
+};

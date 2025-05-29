@@ -7,10 +7,12 @@ import com.vn.ptit.duongvct.service.TestPlanScheduleService;
 import com.vn.ptit.duongvct.util.annotation.ApiMessage;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 @RestController
@@ -34,7 +36,8 @@ public class TestPlanScheduleController {
     @ApiMessage("Get schedules for a test plan with pagination")
     public ResponseEntity<PaginationResponse> getSchedulesByTestPlanPaginated(
             @PathVariable String testPlanId,
-            Pageable pageable) {
+            Pageable pageable
+    ) {
         PaginationResponse response = scheduleService.getSchedulesByTestPlanWithPagination(testPlanId, pageable);
         return ResponseEntity.ok(response);
     }

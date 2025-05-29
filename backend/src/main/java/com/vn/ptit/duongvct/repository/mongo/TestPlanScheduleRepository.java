@@ -17,7 +17,9 @@ public interface TestPlanScheduleRepository extends MongoRepository<TestPlanSche
     @Query("{'enabled': true, 'nextRunTime': {$lte: ?0}}")
     ArrayList<TestPlanSchedule> findSchedulesToRun(LocalDateTime currentTime);
     Page<TestPlanSchedule> findPageByTestPlanId(Pageable pageable, String testPlanId);
-    ArrayList<TestPlanSchedule> findByEnabledTrue();
-
-    boolean existsByName(String name);
+    ArrayList<TestPlanSchedule> findByName(String name);
+    @Query("{'testPlanId': ?0, 'name': {$regex: ?1, $options: 'i'}}")
+    Page<TestPlanSchedule> findByTestPlanIdAndNameContainingIgnoreCase(String testPlanId, String name, Pageable pageable);
+    Page<TestPlanSchedule> findByTestPlanIdAndEnabled(String testPlanId, boolean enabled, Pageable pageable);
+    Page<TestPlanSchedule> findByTestPlanIdAndNextRunTimeBetween(String testPlanId, LocalDateTime start, LocalDateTime end, Pageable pageable);
 }

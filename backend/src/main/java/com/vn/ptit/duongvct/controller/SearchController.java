@@ -36,5 +36,32 @@ public class SearchController {
             Pageable pageable) {
         return ResponseEntity.ok(testPlanService.searchTestPlans(q, pageable));
     }
+    @GetMapping("/schedules")
+    @ApiMessage("Search schedules by name")
+    public ResponseEntity<PaginationResponse> searchSchedules(
+            @RequestParam String testPlanId,
+            @RequestParam String q,
+            Pageable pageable) {
+        return ResponseEntity.ok(scheduleService.searchSchedulesByName(testPlanId, q, pageable));
+    }
+
+    @GetMapping("/schedules/by-status")
+    @ApiMessage("Search schedules by status")
+    public ResponseEntity<PaginationResponse> searchSchedulesByStatus(
+            @RequestParam String testPlanId,
+            @RequestParam boolean enabled,
+            Pageable pageable) {
+        return ResponseEntity.ok(scheduleService.searchSchedulesByStatus(testPlanId, enabled, pageable));
+    }
+
+    @GetMapping("/schedules/by-execution-time")
+    @ApiMessage("Search schedules by execution time range")
+    public ResponseEntity<PaginationResponse> searchSchedulesByExecutionTime(
+            @RequestParam String testPlanId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+            Pageable pageable) {
+        return ResponseEntity.ok(scheduleService.searchSchedulesByNextRunTime(testPlanId, start, end, pageable));
+    }
 
 }

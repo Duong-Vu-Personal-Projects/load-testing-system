@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Input, Button, Space, DatePicker } from 'antd';
 import { SearchOutlined, ClearOutlined } from '@ant-design/icons';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import type {ISearchBarProps} from "./search.bar.tsx";
 
 const { RangePicker } = DatePicker;
 
 interface IAdvancedSearchBarProps extends ISearchBarProps {
-    onDateRangeSearch?: (start: string, end: string) => void;
+    onDateRangeSearch?: (start: dayjs.Dayjs, end: dayjs.Dayjs) => void;
     onStatusSearch?: (enabled: boolean) => void;
     showDateFilter?: boolean;
     showStatusFilter?: boolean;
@@ -34,12 +34,7 @@ export const AdvancedSearchBar: React.FC<IAdvancedSearchBarProps> = (props: IAdv
 
     const handleDateRangeSearch = () => {
         if (dateRange && dateRange[0] && dateRange[1] && onDateRangeSearch) {
-            onDateRangeSearch(
-                dateRange[0].toISOString(),
-                dateRange[1].toISOString()
-            );
-        } else if (onDateRangeSearch) {
-            onDateRangeSearch('', '');
+            onDateRangeSearch(dateRange[0], dateRange[1]);
         }
     };
 
@@ -49,7 +44,7 @@ export const AdvancedSearchBar: React.FC<IAdvancedSearchBarProps> = (props: IAdv
         setStatus(null);
         onSearch('');
         if (onDateRangeSearch) {
-            onDateRangeSearch('', '');
+            onDateRangeSearch(null, null);
         }
     };
 
