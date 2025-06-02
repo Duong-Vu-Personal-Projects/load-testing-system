@@ -22,8 +22,8 @@ public class RequestCreateScheduleDTO {
     @Future(message = "Execution time must be in the future")
     private LocalDateTime executionTime; // For ONCE type
     @Pattern(
-            regexp = "^([0-5]?\\d\\s+){4}([0-5]?\\d|\\*)$",
-            message = "Invalid cron expression"
+        regexp = "^([\\d\\*/,-]+\\s+){5}[\\d\\*/,-]+$",
+        message = "Invalid cron expression"
     )
     private String cronExpression; // For RECURRING type
     private String description;
