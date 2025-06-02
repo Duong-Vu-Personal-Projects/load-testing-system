@@ -4,7 +4,8 @@ import {DeleteTwoTone, EyeTwoTone, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
-import {deleteTestPlanAPI, getAllTestPlanWithPagination } from "../../../../services/api.ts";
+import {deleteTestPlanAPI, getAllTestPlanWithPagination, searchTestPlansAPI} from "../../../../services/api.ts";
+import {SearchBar} from "../../../shared/search.bar.tsx";
 
 interface ITableTestPlan {
     id: string;
@@ -21,6 +22,13 @@ const TablePlan = () => {
         pages: 0,
         total: 0
     });
+    const [isSearching, setIsSearching] = useState<boolean>(false);
+    const [searchKeyword, setSearchKeyword] = useState<string>('');
+    const handleSearch = (value: string) => {
+        setSearchKeyword(value);
+        setIsSearching(!!value);
+        refreshTable();
+    };
     const handleDeleteTestPlan = (testPlanId: string, testPlanTitle: string) => {
         modal.confirm({
             title: `Are you sure you want to delete "${testPlanTitle}"?`,
@@ -99,12 +107,27 @@ const TablePlan = () => {
                 }}
                 request={async (params) => {
                     try {
-                        // Build pagination and sorting
+
                         const page = params.current;
                         const pageSize = params.pageSize || 5;
 
-                        // Make API call
-                        const response = await getAllTestPlanWithPagination(page, pageSize);
+
+                        let response;
+                        if (isSearching && searchKeyword) {
+                            try {
+                                response = await searchTestPlansAPI(searchKeyword, page, pageSize);
+                            } catch (error) {
+                                notification.error({
+                                    message: "Search Error",
+                                    description: response.message
+                                });
+                                setIsSearching(false);
+                                setSearchKeyword('');
+                                response = await getAllTestPlanWithPagination(page, pageSize);
+                            }
+                        } else {
+                            response = await getAllTestPlanWithPagination(page, pageSize);
+                        }
 
                         if (response.data) {
                             setMeta({
@@ -141,6 +164,12 @@ const TablePlan = () => {
                 }}
                 headerTitle="Test Plans"
                 toolBarRender={() => [
+                    <SearchBar
+                        key="search"
+                        onSearch={handleSearch}
+                        placeholder="Search test plans..."
+                        allowClear={true}
+                    />,
                     <Button
                         key="create"
                         type="primary"

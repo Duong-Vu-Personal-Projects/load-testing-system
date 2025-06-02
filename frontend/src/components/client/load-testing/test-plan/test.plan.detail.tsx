@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card, Spin, Alert, Button, Typography, Space,
-  Breadcrumb, Descriptions, Collapse, Tag, App, type CollapseProps
+  Breadcrumb, Descriptions, Collapse, Tag, App, type CollapseProps, Tabs
 } from 'antd';
 import { 
-  ArrowLeftOutlined, EditOutlined, HistoryOutlined, PlayCircleOutlined
+  ArrowLeftOutlined, ClockCircleOutlined, EditOutlined, HistoryOutlined, PlayCircleOutlined
 } from '@ant-design/icons';
 import { getTestPlanDetailAPI, runTestPlanAPI } from "../../../../services/api.ts";
 import type {IThreadStageGroup, IRpsThreadStageGroup, ITestPlan} from "../create-test-plan/type.test.plan.tsx";
+import TestPlanSchedule from '../schedule/test.plan.schedule.tsx';
 
 const { Title } = Typography;
 
@@ -117,7 +118,6 @@ const TestPlanDetail: React.FC = () => {
       </Card>
     );
   }
-
   // Render the thread stage groups details
   const renderThreadGroups = (threadGroups: IThreadStageGroup[]) => {
     if (!threadGroups || threadGroups.length === 0) {
@@ -192,7 +192,47 @@ const TestPlanDetail: React.FC = () => {
         <Collapse items={items}/>
     );
   };
+  const tabItems = [
+    {
+      key: "details",
+      label: "Details",
+      children: (
+          <Card>
+            <Descriptions
+                bordered
+                column={{ xxl: 4, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}
+                title="Basic Information"
+            >
+              <Descriptions.Item label="ID">{testPlanData.id}</Descriptions.Item>
+              <Descriptions.Item label="Title">{testPlanData.title}</Descriptions.Item>
+              <Descriptions.Item label="Thread Groups">{testPlanData.threadStageGroups?.length || 0}</Descriptions.Item>
+              <Descriptions.Item label="RPS Groups">{testPlanData.rpsThreadStageGroups?.length || 0}</Descriptions.Item>
+            </Descriptions>
 
+            {/* Thread Stage Groups */}
+            {testPlanData.threadStageGroups && testPlanData.threadStageGroups.length > 0 && (
+                <div style={{ marginTop: 24 }}>
+                  <Title level={4}>Thread Stage Groups</Title>
+                  {renderThreadGroups(testPlanData.threadStageGroups)}
+                </div>
+            )}
+
+            {/* RPS Thread Stage Groups */}
+            {testPlanData.rpsThreadStageGroups && testPlanData.rpsThreadStageGroups.length > 0 && (
+                <div style={{ marginTop: 24 }}>
+                  <Title level={4}>RPS Thread Stage Groups</Title>
+                  {renderRpsGroups(testPlanData.rpsThreadStageGroups)}
+                </div>
+            )}
+          </Card>
+      ),
+    },
+    {
+      key: "schedules",
+      label: <span><ClockCircleOutlined /> Schedules</span>,
+      children: <TestPlanSchedule />,
+    },
+  ];
   return (
     <div className="test-plan-detail">
       {/* Breadcrumb navigation */}
@@ -247,36 +287,8 @@ const TestPlanDetail: React.FC = () => {
           </Button>
         </Space>
       </div>
-      
-      {/* Test Plan Details Card */}
-      <Card>
-        <Descriptions
-          bordered
-          column={{ xxl: 4, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}
-          title="Basic Information"
-        >
-          <Descriptions.Item label="ID">{testPlanData.id}</Descriptions.Item>
-          <Descriptions.Item label="Title">{testPlanData.title}</Descriptions.Item>
-          <Descriptions.Item label="Thread Groups">{testPlanData.threadStageGroups?.length || 0}</Descriptions.Item>
-          <Descriptions.Item label="RPS Groups">{testPlanData.rpsThreadStageGroups?.length || 0}</Descriptions.Item>
-        </Descriptions>
 
-        {/* Thread Stage Groups */}
-        {testPlanData.threadStageGroups && testPlanData.threadStageGroups.length > 0 && (
-          <div style={{ marginTop: 24 }}>
-            <Title level={4}>Thread Stage Groups</Title>
-            {renderThreadGroups(testPlanData.threadStageGroups)}
-          </div>
-        )}
-
-        {/* RPS Thread Stage Groups */}
-        {testPlanData.rpsThreadStageGroups && testPlanData.rpsThreadStageGroups.length > 0 && (
-          <div style={{ marginTop: 24 }}>
-            <Title level={4}>RPS Thread Stage Groups</Title>
-            {renderRpsGroups(testPlanData.rpsThreadStageGroups)}
-          </div>
-        )}
-      </Card>
+      <Tabs defaultActiveKey="details" items={tabItems} />
     </div>
   );
 };

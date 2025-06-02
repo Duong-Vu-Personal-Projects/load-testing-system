@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, Button, Card, Divider, Typography, App, Tabs, Spin } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -6,7 +6,6 @@ import type { ITestPlan, ITestPlanFormValues } from "../create-test-plan/type.te
 import { editTestPlanAPI, getTestPlanDetailAPI } from "../../../../services/api";
 import TestPlanHeader from '../create-test-plan/test.plan.header';
 import ThreadGroupForm from '../create-test-plan/thread.group.form';
-import HttpConfigForm from "../create-test-plan/http.config.form";
 import RpsThreadGroupForm from "../create-test-plan/rps.thread.group.form";
 
 const { Title } = Typography;
@@ -19,9 +18,8 @@ const EditTestPlan: React.FC = () => {
 
     const [loading, setLoading] = useState<boolean>(false);
     const [fetchingData, setFetchingData] = useState<boolean>(true);
-    const [showBodyInput, setShowBodyInput] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<string>('threadGroups');
-
+    const originalTestPlanRef = useRef<ITestPlan | null>(null);
     useEffect(() => {
         const fetchTestPlanData = async () => {
             if (!id) return;
@@ -32,16 +30,12 @@ const EditTestPlan: React.FC = () => {
 
                 if (response.data) {
                     const testPlan = response.data;
+                    originalTestPlanRef.current = testPlan;
                     form.setFieldsValue({
                         title: testPlan.title,
                         threadStageGroups: testPlan.threadStageGroups || [],
                         rpsThreadStageGroups: testPlan.rpsThreadStageGroups || [],
                     });
-
-                    if (testPlan.threadStageGroups?.length > 0) {
-                        const method = testPlan.threadStageGroups[0].httpMethod;
-                        setShowBodyInput(['POST', 'PUT', 'PATCH'].includes(method || ''));
-                    }
                 } else {
                     notification.error({
                         message: "Failed to get test plan detail",
@@ -61,26 +55,17 @@ const EditTestPlan: React.FC = () => {
         fetchTestPlanData();
     }, [id, form]);
 
-    const onHttpMethodChange = (value: string) => {
-        const showBody = ['POST', 'PUT', 'PATCH'].includes(value);
-        setShowBodyInput(showBody);
-
-        if (!showBody) {
-            form.setFieldsValue({ requestBody: '' });
-        }
-    };
-
     const onFinish = async (values: ITestPlanFormValues) => {
-        if (!id) return;
+        if (!id || !originalTestPlanRef.current) return;
 
         try {
             setLoading(true);
-            // Prepare the request payload
+            const formValues = form.getFieldsValue();
             const testPlan: ITestPlan = {
                 id: id,
                 title: values.title,
-                threadStageGroups: values.threadStageGroups || [],
-                rpsThreadStageGroups: values.rpsThreadStageGroups || []
+                threadStageGroups: formValues.threadStageGroups || originalTestPlanRef.current.threadStageGroups || [],
+                rpsThreadStageGroups: formValues.rpsThreadStageGroups || originalTestPlanRef.current.rpsThreadStageGroups || []
             };
 
             const response = await editTestPlanAPI(testPlan);
@@ -144,14 +129,6 @@ const EditTestPlan: React.FC = () => {
 
                 {/* Thread Groups Tabs */}
                 <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
-
-                <Divider orientation="left">HTTP Request Configuration</Divider>
-
-                {/* HTTP Configuration */}
-                <HttpConfigForm
-                    showBodyInput={showBodyInput}
-                    onHttpMethodChange={onHttpMethodChange}
-                />
 
                 <Form.Item style={{ marginTop: 24 }}>
                     <Button

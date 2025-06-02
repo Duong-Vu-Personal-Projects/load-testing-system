@@ -18,4 +18,5 @@ public interface TestPlanService {
     public ResponseTestPlanDTO mapTestPlan(TestPlan testPlan);
     public PaginationResponse getAllTestPlan(Pageable pageable);
     public PaginationResponse setPaginationResponse (Pageable pageable, Page<TestPlan> pageTestPlan);
+    public PaginationResponse searchTestPlans(String keyword, Pageable pageable);
 }

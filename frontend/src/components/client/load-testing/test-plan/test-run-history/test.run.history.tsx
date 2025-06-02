@@ -4,12 +4,29 @@ import {Table, Card, Button, App, Breadcrumb} from 'antd';
 import {DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import {deleteTestRunAPI, getTestRunOfTestPlanAPI} from "../../../../../services/api.ts";
+import {
+    deleteTestRunAPI,
+    getTestRunOfTestPlanAPI,
+    getTestRunsOfTestPlanWithSearchAPI
+} from "../../../../../services/api.ts";
+import {TimeSearchBar} from "../../../../shared/time.search.bar.tsx";
 
 interface ITestRun {
     id: string;
     title: string;
     time: string;
+}
+
+interface IPagination {
+    current: number,
+    pageSize: number,
+    total: number
+}
+
+interface ISearchParams {
+    title: string;
+    startDate: string;
+    endDate: string;
 }
 
 const TestRunHistory: React.FC = () => {
@@ -20,11 +37,17 @@ const TestRunHistory: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [testRuns, setTestRuns] = useState<ITestRun[]>([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-    const [pagination, setPagination] = useState({
+    const [pagination, setPagination] = useState<IPagination>({
         current: 1,
         pageSize: 10,
         total: 0
     });
+    const [searchParams, setSearchParams] = useState<ISearchParams>({
+        title: '',
+        startDate: '',
+        endDate: ''
+    });
+
     const handleCompare = () => {
         if (selectedRowKeys.length !== 2) {
             notification.warning({
@@ -35,6 +58,7 @@ const TestRunHistory: React.FC = () => {
         }
         navigate(`/plan/compare/${id}/${selectedRowKeys[0]}/${selectedRowKeys[1]}`);
     };
+
     const rowSelection = {
         selectedRowKeys,
         onChange: (selectedKeys: React.Key[]) => {
@@ -50,6 +74,7 @@ const TestRunHistory: React.FC = () => {
             }
         }
     };
+
     const columns: ColumnsType<ITestRun> = [
         {
             title: 'Run Title',
@@ -86,13 +111,32 @@ const TestRunHistory: React.FC = () => {
             ),
         },
     ];
+
     const fetchTestRuns = async () => {
         if (!id) return;
 
         try {
             setLoading(true);
             const page = pagination.current;
-            const response = await getTestRunOfTestPlanAPI(id, page, pagination.pageSize);
+
+            const hasSearchCriteria = searchParams.title.trim() ||
+                searchParams.startDate ||
+                searchParams.endDate;
+
+            let response;
+            if (hasSearchCriteria) {
+                response = await getTestRunsOfTestPlanWithSearchAPI(
+                    id,
+                    page,
+                    pagination.pageSize,
+                    searchParams.title.trim() || undefined,
+                    searchParams.startDate || undefined,
+                    searchParams.endDate || undefined
+                );
+            } else {
+                response = await getTestRunOfTestPlanAPI(id, page, pagination.pageSize);
+            }
+
             if (response.data) {
                 setTestRuns(response.data.result);
                 setPagination({
@@ -114,13 +158,47 @@ const TestRunHistory: React.FC = () => {
     const handleTableChange = (newPagination: any) => {
         setPagination({
             ...pagination,
-            current: newPagination.current,
-            pageSize: newPagination.pageSize
+            current: newPagination.current || 1,
+            pageSize: newPagination.pageSize || 10
         });
     };
+
+    // Handle title search - update title but keep date range
+    const handleSearch = (value: string): void => {
+        setSearchParams({
+            ...searchParams,
+            title: value
+        });
+        setPagination({
+            ...pagination,
+            current: 1
+        });
+    };
+
+    const handleDateRangeSearch = (start: string, end: string): void => {
+        const formattedStart = start ? dayjs(start).format('YYYY-MM-DDTHH:mm:ss') : '';
+        const formattedEnd = end ? dayjs(end).format('YYYY-MM-DDTHH:mm:ss') : '';
+
+        setSearchParams({
+            ...searchParams,
+            startDate: formattedStart,
+            endDate: formattedEnd
+        });
+        setPagination({
+            ...pagination,
+            current: 1
+        });
+    };
+    const hasActiveSearch = () => {
+        return searchParams.title.trim() ||
+            searchParams.startDate ||
+            searchParams.endDate;
+    };
+
     useEffect(() => {
         fetchTestRuns();
-    }, [id, pagination.current, pagination.pageSize]);
+    }, [id, pagination.current, pagination.pageSize, searchParams]);
+
     const handleDeleteTestRun = (record: ITestRun) => {
         modal.confirm({
             title: `Are you sure you want to delete test run "${record.title}"?`,
@@ -135,7 +213,6 @@ const TestRunHistory: React.FC = () => {
                         message: 'Test Run Deleted',
                         description: 'The test run has been successfully deleted.'
                     });
-                    // Refresh the test runs list
                     fetchTestRuns();
                 } catch (error: any) {
                     notification.error({
@@ -146,40 +223,65 @@ const TestRunHistory: React.FC = () => {
             }
         });
     };
+
     return (
         <>
             <Breadcrumb
                 style={{ marginBottom: 16 }}
-                items={
-                    [
-                        {
-                            title: <a onClick={() => navigate('/plan')}>Test Plan</a>
-                        },
-                        {
-                            title: <a onClick={() => navigate(`/plan/${id}`)}>Test Plan Details</a>
-                        },
-                        {
-                            title: 'Edit Test Plan'
-                        }
-                    ]
-                }
+                items={[
+                    {
+                        title: <a onClick={() => navigate('/plan')}>Test Plan</a>
+                    },
+                    {
+                        title: <a onClick={() => navigate(`/plan/${id}`)}>Test Plan Details</a>
+                    },
+                    {
+                        title: 'Test Run History'
+                    }
+                ]}
             />
             <Card
                 title="Test Run History"
                 extra={
-                <>
-                    <Button
-                        type="primary"
-                        onClick={handleCompare}
-                        disabled={selectedRowKeys.length !== 2}
-                    >
-                        Compare Selected Runs
-                    </Button>
-                </>
-
-
+                    <>
+                        <Button
+                            type="primary"
+                            onClick={handleCompare}
+                            disabled={selectedRowKeys.length !== 2}
+                        >
+                            Compare Selected Runs
+                        </Button>
+                    </>
                 }
             >
+                <div style={{ marginBottom: 16 }}>
+                    <TimeSearchBar
+                        onSearch={handleSearch}
+                        onDateRangeSearch={handleDateRangeSearch}
+                        placeholder="Search test runs by title..."
+                        showDateFilter={true}
+                    />
+
+                    {/* Show active search criteria */}
+                    {hasActiveSearch() && (
+                        <div style={{ marginTop: 8, padding: 8, backgroundColor: '#f5f5f5', borderRadius: 4 }}>
+                            <strong>Active Filters:</strong>
+                            {searchParams.title && (
+                                <span style={{ marginLeft: 8, padding: '2px 8px', backgroundColor: '#e6f7ff', borderRadius: 4 }}>
+                                    Title: "{searchParams.title}"
+                                </span>
+                            )}
+                            {(searchParams.startDate || searchParams.endDate) && (
+                                <span style={{ marginLeft: 8, padding: '2px 8px', backgroundColor: '#f6ffed', borderRadius: 4 }}>
+                                    Date: {searchParams.startDate ? dayjs(searchParams.startDate).format('YYYY-MM-DD HH:mm') : 'Any'}
+                                    {' to '}
+                                    {searchParams.endDate ? dayjs(searchParams.endDate).format('YYYY-MM-DD HH:mm') : 'Any'}
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </div>
+
                 <Table
                     rowSelection={rowSelection}
                     columns={columns}
@@ -195,8 +297,6 @@ const TestRunHistory: React.FC = () => {
                 />
             </Card>
         </>
-
-
     );
 };
 

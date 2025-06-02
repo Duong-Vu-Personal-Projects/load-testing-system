@@ -61,7 +61,8 @@ const TestInfoPanel: React.FC<ITestInfoPanelProps> = (props: ITestInfoPanelProps
                         Target RPS: {group.rampToThreads} |
                         Max Threads: {group.maxThreads} |
                         Ramp-up: {group.rampDuration}s |
-                        Hold: {group.holdDuration}s
+                        Hold: {group.holdDuration}s |
+                        Follow Redirects: {group.followRedirects ? 'Yes' : 'No'}
                     </Descriptions.Item>
                 ))}
             </Descriptions>

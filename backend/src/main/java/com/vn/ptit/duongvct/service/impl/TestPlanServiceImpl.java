@@ -7,6 +7,7 @@ import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.ResponseTableTestPlanDTO;
 import com.vn.ptit.duongvct.dto.response.testplan.ResponseTestPlanDTO;
 import com.vn.ptit.duongvct.repository.mongo.TestPlanRepository;
+import com.vn.ptit.duongvct.repository.search.TestPlanSearchRepository;
 import com.vn.ptit.duongvct.service.TestPlanService;
 import com.vn.ptit.duongvct.service.TestRunService;
 import org.modelmapper.ModelMapper;
@@ -23,10 +24,12 @@ public class TestPlanServiceImpl implements TestPlanService {
     private final TestPlanRepository testPlanRepository;
     private final TestRunService testRunService;
     private final ModelMapper mapper;
-    public TestPlanServiceImpl(TestPlanRepository testPlanRepository, TestRunService testRunService, ModelMapper modelMapper) {
+    private final TestPlanSearchRepository testPlanSearchRepository;
+    public TestPlanServiceImpl(TestPlanRepository testPlanRepository, TestRunService testRunService, ModelMapper modelMapper, TestPlanSearchRepository testPlanSearchRepository) {
         this.testPlanRepository = testPlanRepository;
         this.testRunService = testRunService;
         this.mapper = modelMapper;
+        this.testPlanSearchRepository = testPlanSearchRepository;
     }
 
     @Override
@@ -40,6 +43,7 @@ public class TestPlanServiceImpl implements TestPlanService {
         if (foundedTestPlan.isEmpty()) {
             throw new NoSuchElementException("Cannot find test plan with id = " + testPlan.getId());
         }
+        this.testPlanSearchRepository.save(testPlan);
         return this.testPlanRepository.save(testPlan);
     }
 
@@ -53,6 +57,7 @@ public class TestPlanServiceImpl implements TestPlanService {
         for (TestRun testRun : testRuns) {
             this.testRunService.deleteTestRun(testRun);
         }
+        this.testPlanSearchRepository.deleteById(id);
         this.testPlanRepository.deleteById(id);
     }
 
@@ -71,6 +76,7 @@ public class TestPlanServiceImpl implements TestPlanService {
         if (this.testPlanRepository.existsByTitle(testPlan.getTitle())) {
             throw new IllegalArgumentException("Title is already exists. Please choose another title name");
         }
+        this.testPlanSearchRepository.save(testPlan);
         return this.testPlanRepository.save(testPlan);
     }
     @Override
@@ -93,5 +99,16 @@ public class TestPlanServiceImpl implements TestPlanService {
         meta.setTotal(pageTestPlan.getTotalElements());
         result.setMeta(meta);
         return result;
+    }
+
+    @Override
+    public PaginationResponse searchTestPlans(String keyword, Pageable pageable) {
+        Page<TestPlan> pages = this.testPlanSearchRepository.findByTitleCustom(keyword, pageable);
+        PaginationResponse res = setPaginationResponse(pageable, pages);
+        ArrayList<ResponseTableTestPlanDTO> list = new ArrayList<>(pages.getContent().stream().map(
+                testPlan -> this.mapper.map(testPlan, ResponseTableTestPlanDTO.class)
+        ).toList());
+        res.setResult(list);
+        return res;
     }
 }

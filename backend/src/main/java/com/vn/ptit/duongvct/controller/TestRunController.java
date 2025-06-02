@@ -10,9 +10,11 @@ import com.vn.ptit.duongvct.service.TestRunComparisonService;
 import com.vn.ptit.duongvct.service.TestRunService;
 import com.vn.ptit.duongvct.util.annotation.ApiMessage;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -41,11 +43,14 @@ public class TestRunController {
         return ResponseEntity.ok(this.testRunService.mapTestRunToResult(optionalTestRun.get()));
     }
     @GetMapping("/plan/{testPlanId}")
-    @ApiMessage("Get all test runs for a test plan with pagination")
+    @ApiMessage("Get test runs for a test plan with pagination and optional search criteria")
     public ResponseEntity<PaginationResponse> getTestRunsForTestPlanPaginated(
             @PathVariable String testPlanId,
-            Pageable pageable) {
-        return ResponseEntity.ok(this.testRunService.getAllTestRunOfTestPlan(pageable, testPlanId));
+            Pageable pageable,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        return ResponseEntity.ok(this.testRunService.getAllTestRunOfTestPlan(pageable, testPlanId, title, startDate, endDate));
     }
     @GetMapping("/compare/{runId1}/{runId2}")
     @ApiMessage("Compare two test runs")

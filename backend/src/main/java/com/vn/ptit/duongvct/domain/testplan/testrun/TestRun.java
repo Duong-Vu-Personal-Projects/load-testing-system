@@ -13,7 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "test_runs")
 @Document(collection = "test_runs")
 @Getter
 @Setter

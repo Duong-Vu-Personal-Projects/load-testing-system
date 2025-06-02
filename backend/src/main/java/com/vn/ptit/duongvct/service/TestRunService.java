@@ -10,6 +10,7 @@ import com.vn.ptit.duongvct.dto.response.testplan.testrun.ResponseTestRunDetailD
 import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -19,8 +20,8 @@ public interface TestRunService {
     public TestRun createTestRun(TestRun testRun);
     public ResponseTestRunDetailDTO mapTestRunToResult(TestRun testRun);
     public Optional<TestRun> findById(String id);
-    PaginationResponse getAllTestRunOfTestPlan(Pageable pageable, String testPlanId);
-    ArrayList<ResponseTableTestRunDTO> getAllTestRunOfTestPlan(String testPlanId);
+    PaginationResponse getAllTestRunOfTestPlan(Pageable pageable, String testPlanId,
+                                               String title, LocalDateTime startDate, LocalDateTime endDate);
     ArrayList<TestRun> getAllTestRunOfATestPlan(String testPlanId);
     public void deleteTestRun(TestRun testRun);
 }

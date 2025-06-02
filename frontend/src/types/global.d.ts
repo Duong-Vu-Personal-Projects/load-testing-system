@@ -15,6 +15,7 @@ declare global {
         status: string;
         statusCode: number;
         data?: T;
+        timestamp: string
     }
     interface ILogin {
         access_token: string;
@@ -44,7 +45,7 @@ declare global {
         user: IUser
     }
     interface IMeta {
-        page: number,
+        page: number|null,
         pageSize: number,
         pages: number,
         total: number

@@ -4,6 +4,7 @@ import com.vn.ptit.duongvct.domain.testplan.testresult.TestResultRecord;
 import com.vn.ptit.duongvct.domain.testplan.testresult.TestResults;
 import com.vn.ptit.duongvct.dto.response.testplan.testresult.TestResultDTO;
 import com.vn.ptit.duongvct.repository.mongo.TestResultRepository;
+import com.vn.ptit.duongvct.repository.search.TestResultSearchRepository;
 import com.vn.ptit.duongvct.service.TestResultService;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +16,15 @@ import java.util.stream.Collectors;
 @Service
 public class TestResultServiceImpl implements TestResultService {
     private final TestResultRepository testResultRepository;
-
-    public TestResultServiceImpl(TestResultRepository testResultRepository) {
+    private final TestResultSearchRepository testResultSearchRepository;
+    public TestResultServiceImpl(TestResultRepository testResultRepository, TestResultSearchRepository testResultSearchRepository) {
         this.testResultRepository = testResultRepository;
+        this.testResultSearchRepository = testResultSearchRepository;
     }
 
     @Override
     public TestResults createTestResult(TestResults testResults) {
+        this.testResultSearchRepository.save(testResults);
         return testResultRepository.save(testResults);
     }
 
@@ -38,6 +41,7 @@ public class TestResultServiceImpl implements TestResultService {
 
     @Override
     public void deleteTestResult(TestResults testResults) {
+        this.testResultSearchRepository.delete(testResults);
         this.testResultRepository.delete(testResults);
     }
 
