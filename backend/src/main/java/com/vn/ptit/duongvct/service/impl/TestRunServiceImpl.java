@@ -127,6 +127,7 @@ public class TestRunServiceImpl implements TestRunService {
             dslTestPlan.children(jtlWriter(directory, fileName));
             dslTestPlan.saveAsJmx("jmeter/jmx/" + fileName + ".jmx");
             logger.info("Executing JMeter test for plan: {}", testPlan.getTitle());
+//            dslTestPlan.showTimeline();
             TestPlanStats stats = dslTestPlan.run();
             long executionTime = System.currentTimeMillis() - startTime;
             logger.info("Test execution completed in {}ms for plan: {}", executionTime, testPlan.getTitle());

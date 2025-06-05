@@ -11,14 +11,14 @@ const ErrorRateComparison = (props: ICompareTestRun) => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Statistic
-                            title="Run 1"
+                            title={testRun1.title}
                             value={(testRun1.stats.errorRate * 100).toFixed(2)}
                             suffix="%"
                         />
                     </Col>
                     <Col span={12}>
                         <Statistic
-                            title="Run 2"
+                            title={testRun2.title}
                             value={(testRun2.stats.errorRate * 100).toFixed(2)}
                             suffix="%"
                             valueStyle={{

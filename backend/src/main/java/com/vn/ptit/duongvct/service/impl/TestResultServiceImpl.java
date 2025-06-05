@@ -49,15 +49,23 @@ public class TestResultServiceImpl implements TestResultService {
      * Converts a TestResults entity to a TestResultDTO with arrays for each attribute
      */
     private TestResultDTO convertToDTO(TestResults testResults) {
-        if (testResults == null || testResults.getRecords() == null) {
-            return new TestResultDTO();
+        TestResultDTO dto = new TestResultDTO();
+
+        if (testResults == null) {
+            return dto;
         }
 
-        List<TestResultRecord> records = testResults.getRecords();
-
-        TestResultDTO dto = new TestResultDTO();
+        // Always set ID regardless of records
         dto.setId(testResults.getId());
 
+        // Return early if records are null
+        if (testResults.getRecords() == null) {
+            dto.setSampleCount(0);
+            dto.setErrorCount(0);
+            dto.setErrorRate(0.0);
+            return dto;
+        }
+        List<TestResultRecord> records = testResults.getRecords();
         // Extract each attribute as an array
         List<Long> timestamps = new ArrayList<>();
         List<Long> elapsedTimes = new ArrayList<>();

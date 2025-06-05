@@ -11,14 +11,14 @@ const MedianResponseTimeComparison = (props: ICompareTestRun) => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Statistic
-                            title="Run 1"
+                            title={testRun1.title}
                             value={testRun1.stats.medianResponseTime}
                             suffix="ms"
                         />
                     </Col>
                     <Col span={12}>
                         <Statistic
-                            title="Run 2"
+                            title={testRun2.title}
                             value={testRun2.stats.medianResponseTime}
                             suffix="ms"
                             valueStyle={{

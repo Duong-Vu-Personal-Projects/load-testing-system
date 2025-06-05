@@ -11,13 +11,13 @@ const TotalRequestComparison = (props: ICompareTestRun) => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Statistic
-                            title="Run 1"
+                            title={testRun1.title}
                             value={testRun1.stats.sampleCounts}
                         />
                     </Col>
                     <Col span={12}>
                         <Statistic
-                            title="Run 2"
+                            title={testRun2.title}
                             value={testRun2.stats.sampleCounts}
                             valueStyle={{
                                 color: testRun2.stats.sampleCounts > testRun1.stats.sampleCounts ? '#3f8600' :
