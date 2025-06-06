@@ -14,16 +14,19 @@ interface IScheduleListProps {
     onPaginationChange: (page: number, pageSize: number) => void;
     onDeleteSchedule: (id: string) => void;
     onToggleStatus: (id: string) => void;
+    onEditSchedule: (schedule: ISchedule) => void;
 }
 
-const ScheduleList: React.FC<IScheduleListProps> = ({
-                                                        schedules,
-                                                        loading,
-                                                        pagination,
-                                                        onPaginationChange,
-                                                        onDeleteSchedule,
-                                                        onToggleStatus
-                                                    }) => {
+const ScheduleList: React.FC<IScheduleListProps> = (props: IScheduleListProps) => {
+    const {
+        schedules,
+        loading,
+        pagination,
+        onPaginationChange,
+        onDeleteSchedule,
+        onToggleStatus,
+        onEditSchedule
+    } = props;
     return (
         <div>
             <List
@@ -35,6 +38,7 @@ const ScheduleList: React.FC<IScheduleListProps> = ({
                         schedule={schedule}
                         onDelete={onDeleteSchedule}
                         onToggle={onToggleStatus}
+                        onEdit = {onEditSchedule}
                     />
                 )}
             />

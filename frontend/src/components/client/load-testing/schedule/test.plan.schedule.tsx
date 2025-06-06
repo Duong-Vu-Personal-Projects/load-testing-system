@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Typography, Space, App, Divider } from 'antd';
 import { PlusOutlined, ReloadOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
-import type {IRequestCreateSchedule, ISchedule} from './type.schedule';
+import type {IRequestCreateSchedule, IRequestEditSchedule, ISchedule} from './type.schedule';
 import {
     createScheduleAPI,
     deleteScheduleAPI,
@@ -10,7 +10,8 @@ import {
     toggleScheduleStatusAPI,
     searchSchedulesByNameAPI,
     searchSchedulesByStatusAPI,
-    searchSchedulesByExecutionTimeAPI
+    searchSchedulesByExecutionTimeAPI,
+    updateScheduleAPI
 } from '../../../../services/api';
 import ScheduleList from "./schedule.list.tsx";
 import NoSchedules from "./no.schedule.tsx";
@@ -23,8 +24,6 @@ const { Title } = Typography;
 const TestPlanSchedule: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { notification } = App.useApp();
-
-    // State variables
     const [schedules, setSchedules] = useState<ISchedule[]>([]);
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -34,8 +33,7 @@ const TestPlanSchedule: React.FC = () => {
         pageSize: 10,
         total: 0
     });
-
-    // Search state variables
+    const [currentEditSchedule, setCurrentEditSchedule] = useState<ISchedule | null>(null);
     const [searchActive, setSearchActive] = useState(false);
     const [searchByName, setSearchByName] = useState('');
     const [searchByStatus, setSearchByStatus] = useState<boolean | undefined>(undefined);
@@ -44,8 +42,10 @@ const TestPlanSchedule: React.FC = () => {
     useEffect(() => {
         fetchSchedules();
     }, [id, pagination.current, pagination.pageSize]);
-
-    // Cập nhật hàm fetchSchedules để nhận các tham số ghi đè
+    const handleEditSchedule = (schedule: ISchedule) => {
+        setCurrentEditSchedule(schedule);
+        setIsModalVisible(true);
+    };
     const fetchSchedules = async (overrides?: {
         isActive?: boolean,
         nameFilter?: string,
@@ -217,35 +217,62 @@ const TestPlanSchedule: React.FC = () => {
             });
         }
     };
-    const handleCreateSchedule = async (values: IRequestCreateSchedule) => {
+    const handleFormSubmit = async (values: IRequestCreateSchedule) => {
         try {
             setConfirmLoading(true);
-            const response = await createScheduleAPI(values);
+            let response;
 
-            if (response && response.data) {
-                notification.success({
-                    message: 'Schedule Created',
-                    description: `Schedule "${values.name}" created successfully`
-                });
-                setIsModalVisible(false);
-                fetchSchedules();
+            if (currentEditSchedule) {
+                const newValues : IRequestEditSchedule = {
+                    id: currentEditSchedule.id,
+                    ...values
+                };
+                response = await updateScheduleAPI(newValues);
+                if (response && response.data) {
+                    notification.success({
+                        message: 'Schedule Updated',
+                        description: `Schedule "${values.name}" updated successfully`
+                    });
+                    setIsModalVisible(false);
+                    setCurrentEditSchedule(null);
+                    fetchSchedules();
+                } else {
+                    notification.error({
+                        message: 'Failed to update schedule',
+                        description: response?.message || 'Unknown error occurred'
+                    });
+                }
             } else {
-                notification.error({
-                    message: 'Failed to create schedule',
-                    description: response?.message || 'Unknown error occurred'
-                });
+                // Create new schedule
+                response = await createScheduleAPI(values);
+                if (response && response.data) {
+                    notification.success({
+                        message: 'Schedule Created',
+                        description: `Schedule "${values.name}" created successfully`
+                    });
+                    setIsModalVisible(false);
+                    fetchSchedules();
+                } else {
+                    notification.error({
+                        message: 'Failed to create schedule',
+                        description: response?.message || 'Unknown error occurred'
+                    });
+                }
             }
         } catch (error) {
             notification.error({
-                message: 'Error creating schedule',
-                description: 'An error occurred while creating the schedule'
+                message: currentEditSchedule ? 'Error updating schedule' : 'Error creating schedule',
+                description: `An error occurred while ${currentEditSchedule ? 'updating' : 'creating'} the schedule`
             });
-            console.error('Error creating schedule:', error);
+            console.error(`Error ${currentEditSchedule ? 'updating' : 'creating'} schedule:`, error);
         } finally {
             setConfirmLoading(false);
         }
     };
-
+    const handleModalCancel = () => {
+        setIsModalVisible(false);
+        setCurrentEditSchedule(null);
+    };
     const handleToggleStatus = async (scheduleId: string) => {
         try {
             const response = await toggleScheduleStatusAPI(scheduleId);
@@ -321,7 +348,10 @@ const TestPlanSchedule: React.FC = () => {
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
-                        onClick={() => setIsModalVisible(true)}
+                        onClick={() => {
+                            setCurrentEditSchedule(null);
+                            setIsModalVisible(true);
+                        }}
                     >
                         Create Schedule
                     </Button>
@@ -380,6 +410,7 @@ const TestPlanSchedule: React.FC = () => {
                     onPaginationChange={handlePaginationChange}
                     onDeleteSchedule={handleDeleteSchedule}
                     onToggleStatus={handleToggleStatus}
+                    onEditSchedule={handleEditSchedule}
                 />
             ) : loading ? (
                 <div style={{ textAlign: 'center', padding: 24 }}>
@@ -391,16 +422,21 @@ const TestPlanSchedule: React.FC = () => {
                     <Button onClick={resetSearch}>Clear Search</Button>
                 </div>
             ) : (
-                <NoSchedules onCreateClick={() => setIsModalVisible(true)} />
+                <NoSchedules onCreateClick={() => {
+                    setCurrentEditSchedule(null);
+                    setIsModalVisible(true);
+                }} />
             )}
 
-            {/* Schedule creation modal */}
+            {/* Schedule form modal (Create or Edit) */}
             <ScheduleForm
                 testPlanId={id || ''}
                 visible={isModalVisible}
-                onCancel={() => setIsModalVisible(false)}
-                onSubmit={handleCreateSchedule}
+                onCancel={handleModalCancel}
+                onSubmit={handleFormSubmit}
                 confirmLoading={confirmLoading}
+                editSchedule={currentEditSchedule}
+                title={currentEditSchedule ? "Edit Schedule" : "Create Schedule"}
             />
         </Card>
     );

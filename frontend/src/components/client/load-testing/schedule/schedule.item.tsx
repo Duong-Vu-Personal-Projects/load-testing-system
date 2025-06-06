@@ -1,87 +1,88 @@
 import React from 'react';
-import { Button, Card, Space, Tag, Popconfirm, Typography } from 'antd';
-import { ClockCircleOutlined, DeleteOutlined } from '@ant-design/icons';
+import { List, Button, Switch, Typography, Tag, Space, Tooltip } from 'antd';
+import { DeleteOutlined, EditOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import type {ISchedule} from './type.schedule';
 import dayjs from 'dayjs';
-import {EScheduleType, type ISchedule} from "./type.schedule.tsx";
-const { Text } = Typography;
+
 interface IScheduleItemProps {
     schedule: ISchedule;
     onDelete: (id: string) => void;
     onToggle: (id: string) => void;
+    onEdit: (schedule: ISchedule) => void;
 }
 
-const ScheduleItem: React.FC<IScheduleItemProps> = ({ schedule, onDelete, onToggle }) => {
+const { Text } = Typography;
+
+const ScheduleItem: React.FC<IScheduleItemProps> = (props: IScheduleItemProps) => {
+    const {
+        schedule,
+        onDelete,
+        onToggle,
+        onEdit
+    } = props;
     return (
-        <Card
-            style={{ marginBottom: 16 }}
-            title={
-                <Space>
-                    <ClockCircleOutlined />
-                    <span>{schedule.name}</span>
-                    <Tag color={schedule.enabled ? 'green' : 'red'}>
-                        {schedule.enabled ? 'Enabled' : 'Disabled'}
-                    </Tag>
-                </Space>
-            }
-            extra={
-                <Popconfirm
-                    title="Are you sure you want to delete this schedule?"
-                    onConfirm={() => onDelete(schedule.id)}
-                    okText="Yes"
-                    cancelText="No"
-                    placement="topRight"
-                >
-                    <Button type="text" danger icon={<DeleteOutlined />} />
-                </Popconfirm>
-            }
+        <List.Item
+            actions={[
+                <Switch
+                    key="toggle"
+                    checked={schedule.enabled}
+                    onChange={() => onToggle(schedule.id)}
+                    checkedChildren="Enabled"
+                    unCheckedChildren="Disabled"
+                />,
+                <Tooltip title="Edit Schedule" key="edit">
+                    <Button
+                        type="text"
+                        icon={<EditOutlined />}
+                        onClick={() => onEdit(schedule)}
+                    />
+                </Tooltip>,
+                <Tooltip title="Delete Schedule" key="delete">
+                    <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => onDelete(schedule.id)}
+                    />
+                </Tooltip>
+            ]}
         >
-            <Space direction="vertical" style={{ width: '100%' }}>
-                <div>
-                    <Text strong>Type: </Text>
-                    <Tag color={schedule.type === EScheduleType.ONCE ? 'blue' : 'green'}>
-                        {schedule.type === EScheduleType.ONCE ? 'One-time' : 'Recurring'}
-                    </Tag>
-                </div>
-
-                {schedule.type === EScheduleType.ONCE ? (
-                    <div>
-                        <Text strong>Execution time: </Text>
-                        <Text>{schedule.executionTime ? dayjs(schedule.executionTime).format('YYYY-MM-DD HH:mm:ss') : 'Not set'}</Text>
-                    </div>
-                ) : (
-                    <div>
-                        <Text strong>Cron expression: </Text>
-                        <Text code>{schedule.cronExpression}</Text>
-                    </div>
-                )}
-
-                <div>
-                    <Text strong>Next run: </Text>
-                    <Text>{schedule.nextRunTime ? dayjs(schedule.nextRunTime).format('YYYY-MM-DD HH:mm:ss') : 'Not scheduled'}</Text>
-                </div>
-
-                {schedule.lastRunTime && (
-                    <div>
-                        <Text strong>Last run: </Text>
-                        <Text>{dayjs(schedule.lastRunTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
-                    </div>
-                )}
-
-                {schedule.description && (
-                    <div>
-                        <Text strong>Description: </Text>
-                        <Text>{schedule.description}</Text>
-                    </div>
-                )}
-
-                <Button
-                    type={schedule.enabled ? 'default' : 'primary'}
-                    onClick={() => onToggle(schedule.id)}
-                >
-                    {schedule.enabled ? 'Disable' : 'Enable'}
-                </Button>
-            </Space>
-        </Card>
+            <List.Item.Meta
+                title={
+                    <Space>
+                        {schedule.name}
+                        <Tag color={schedule.enabled ? "green" : "default"}>
+                            {schedule.enabled ? "Active" : "Inactive"}
+                        </Tag>
+                        <Tag color={schedule.type === 'ONCE' ? "blue" : "purple"}>
+                            {schedule.type === 'ONCE' ? "One-time" : "Recurring"}
+                        </Tag>
+                    </Space>
+                }
+                description={
+                    <>
+                        <div>{schedule.description}</div>
+                        <div>
+                            <Text type="secondary">Test Plan: {schedule.testPlanTitle}</Text>
+                        </div>
+                        {schedule.type === 'ONCE' ? (
+                            <div>
+                                <ClockCircleOutlined /> Execution time: {dayjs(schedule.executionTime).format('YYYY-MM-DD HH:mm:ss')}
+                            </div>
+                        ) : (
+                            <div>
+                                <ClockCircleOutlined /> Cron Expression: {schedule.cronExpression}
+                            </div>
+                        )}
+                        {schedule.nextRunTime && (
+                            <div>
+                                <Text type="secondary">Next run: {dayjs(schedule.nextRunTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
+                            </div>
+                        )}
+                    </>
+                }
+            />
+        </List.Item>
     );
 };
 

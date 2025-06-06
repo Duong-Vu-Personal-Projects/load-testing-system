@@ -142,54 +142,54 @@ services:
     networks:
       - elk
 
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: load-testing-backend
-    restart: unless-stopped
-    ports:
-      - 8080:8080
-    environment:
-      SPRING_APPLICATION_NAME: load-testing
-      SPRING_DATA_MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/load_testing?authSource=admin
-      SPRING_DATA_MONGODB_DATABASE: load_testing
-      SPRING_DATA_MONGODB_CONNECTION_POOL_MAX_SIZE: 100
-      SPRING_DATA_MONGODB_CONNECTION_POOL_MIN_SIZE: 5
-      SPRING_DATA_MONGODB_CONNECT_TIMEOUT: 5000
-      SPRING_DATA_MONGODB_SOCKET_TIMEOUT: 10000
-      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
-      SPRING_ELASTICSEARCH_USERNAME: elastic
-      SPRING_ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD}
-      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_DATA_MONGODB: INFO
-      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_DATA_ELASTICSEARCH: INFO
-      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus,metrics
-      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
-      MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: true
-      MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: true
-      JWT_BASE64_SECRET: ${JWT_BASE64_SECRET}
-      JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS: 8640000
-      JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS: 8640000
-      SPRING_PROFILES_ACTIVE: docker
-      LOGSTASH_HOST: logstash:50000
-      SPRING_GROOVY_TEMPLATE_CHECK_TEMPLATE_LOCATION: false
-      SPRING_THYMELEAF_CHECK_TEMPLATE_LOCATION: false
-      SPRING_FREEMARKER_CHECK_TEMPLATE_LOCATION: false
-      SPRING_GROOVY_TEMPLATE_ENABLED: false
-      SPRING_THYMELEAF_ENABLED: false
-      SPRING_FREEMARKER_ENABLED: false
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: load-testing-backend
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8080:8080
+  #   environment:
+  #     SPRING_APPLICATION_NAME: load-testing
+  #     SPRING_DATA_MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/load_testing?authSource=admin
+  #     SPRING_DATA_MONGODB_DATABASE: load_testing
+  #     SPRING_DATA_MONGODB_CONNECTION_POOL_MAX_SIZE: 100
+  #     SPRING_DATA_MONGODB_CONNECTION_POOL_MIN_SIZE: 5
+  #     SPRING_DATA_MONGODB_CONNECT_TIMEOUT: 5000
+  #     SPRING_DATA_MONGODB_SOCKET_TIMEOUT: 10000
+  #     SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+  #     SPRING_ELASTICSEARCH_USERNAME: elastic
+  #     SPRING_ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD}
+  #     LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_DATA_MONGODB: INFO
+  #     LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_DATA_ELASTICSEARCH: INFO
+  #     MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus,metrics
+  #     MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+  #     MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: true
+  #     MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: true
+  #     JWT_BASE64_SECRET: ${JWT_BASE64_SECRET}
+  #     JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS: 8640000
+  #     JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS: 8640000
+  #     SPRING_PROFILES_ACTIVE: docker
+  #     LOGSTASH_HOST: logstash:50000
+  #     SPRING_GROOVY_TEMPLATE_CHECK_TEMPLATE_LOCATION: false
+  #     SPRING_THYMELEAF_CHECK_TEMPLATE_LOCATION: false
+  #     SPRING_FREEMARKER_CHECK_TEMPLATE_LOCATION: false
+  #     SPRING_GROOVY_TEMPLATE_ENABLED: false
+  #     SPRING_THYMELEAF_ENABLED: false
+  #     SPRING_FREEMARKER_ENABLED: false
       
-      # Fix JarFileSystem issue
-      SPRING_JMX_ENABLED: false
-      SPRING_MAIN_CLOUD_PLATFORM: NONE
-      TZ: Asia/Ho_Chi_Minh
-      # Add JVM options for FileSystemProvider issues
-      JAVA_TOOL_OPTIONS: -Djava.security.properties=/dev/null
-    depends_on:
-      - mongodb
-      - elasticsearch
-    networks:
-      - elk
+  #     # Fix JarFileSystem issue
+  #     SPRING_JMX_ENABLED: false
+  #     SPRING_MAIN_CLOUD_PLATFORM: NONE
+  #     TZ: Asia/Ho_Chi_Minh
+  #     # Add JVM options for FileSystemProvider issues
+  #     JAVA_TOOL_OPTIONS: -Djava.security.properties=/dev/null
+  #   depends_on:
+  #     - mongodb
+  #     - elasticsearch
+  #   networks:
+  #     - elk
 
   prometheus:
     image: prom/prometheus:v3.3.1
@@ -239,28 +239,28 @@ services:
   #     - TZ=UTC+7
   #   networks:
   #     - elk
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: react-frontend
-    restart: unless-stopped
-    ports:
-      - 80:80
-    # volumes:
-    #   - ./frontend:/app  # For development only (remove in production)
-    #   - /app/node_modules # Don't mount node_modules
-    #   - ./backend/jmeter:/app/jmeter
-    environment:
-      # - NODE_ENV=development  # Change to production for production builds
-      VITE_API_URL: http://localhost:8080  # Backend API URL
-      VITE_KIBANA_URL: http://localhost:5601  # Kibana URL
-      VITE_GRAFANA_URL: http://localhost:3000  # Grafana URL
-    depends_on:
-      - backend 
-      - mongodb
-    networks:
-      - elk
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: react-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - 80:80
+  #   # volumes:
+  #   #   - ./frontend:/app  # For development only (remove in production)
+  #   #   - /app/node_modules # Don't mount node_modules
+  #   #   - ./backend/jmeter:/app/jmeter
+  #   environment:
+  #     # - NODE_ENV=development  # Change to production for production builds
+  #     VITE_API_URL: http://localhost:8080  # Backend API URL
+  #     VITE_KIBANA_URL: http://localhost:5601  # Kibana URL
+  #     VITE_GRAFANA_URL: http://localhost:3000  # Grafana URL
+  #   depends_on:
+  #     - backend 
+  #     - mongodb
+  #   networks:
+  #     - elk
 networks:
   elk:
     driver: bridge

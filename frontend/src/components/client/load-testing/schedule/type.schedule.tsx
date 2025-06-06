@@ -33,3 +33,12 @@ export interface IResponseSchedule {
     meta: IMeta;
     result: ISchedule[];
 }
+export interface IRequestEditSchedule {
+    id: string;
+    testPlanId: string;
+    name: string;
+    type: EScheduleType;
+    executionTime?: string;
+    cronExpression?: string;
+    description?: string;
+}
