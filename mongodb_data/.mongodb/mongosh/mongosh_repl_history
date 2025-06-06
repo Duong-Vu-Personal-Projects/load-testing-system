@@ -1,0 +1,4 @@
+exit
+show dbs;
+db.createCollection("test_results");
+use load_testing

@@ -26,9 +26,9 @@ replay_pid*
 
 **/.env
 
-**/mongodb_data
-**/prometheus_data
-**/grafana_data
-**/elasticsearch_data
+# **/mongodb_data
+# **/prometheus_data
+# **/grafana_data
+# **/elasticsearch_data
 
 **/jmeter

@@ -160,7 +160,18 @@ const ScheduleForm: React.FC<IScheduleFormProps> = (props: IScheduleFormProps) =
                             name="cronExpression"
                             label="Cron Expression"
                             rules={[{ required: true, message: 'Please enter a cron expression' }]}
-                            help="Example: 0 0 12 * * ? (daily at noon)"
+                            extra={
+                                <div>
+                                <div>For Cron expression, check <a href={'https://crontab.guru/'}>here</a></div>
+                                <div>But that is the helper for cron job in linux, in backend the cron expression is little different:</div>
+                                <div>Backend needs 6 params, with the first param is seconds</div>
+                                <div>Examples:</div>
+                                <div>- Every day at 8:00 AM: 0 0 8 * * *</div>
+                                <div>- Every Monday at 9:00 AM: 0 0 9 * * MON</div>
+                                <div>- Every 30 minutes:0 */30 * * * *</div>
+
+                    </div>
+                }
                         >
                             <Input placeholder="Enter cron expression" />
                         </Form.Item>
