@@ -19,4 +19,5 @@ public class TestPlan {
     private String title;
     private ArrayList<ThreadStageGroup> threadStageGroups;
     private ArrayList<RpsThreadStageGroup> rpsThreadStageGroups;
+    private AutoStopConfig globalAutoStop;
 }

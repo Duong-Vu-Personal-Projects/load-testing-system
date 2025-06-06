@@ -16,6 +16,7 @@ import com.vn.ptit.duongvct.repository.mongo.TestRunRepository;
 import com.vn.ptit.duongvct.repository.search.TestRunSearchRepository;
 import com.vn.ptit.duongvct.service.TestResultService;
 import com.vn.ptit.duongvct.service.TestRunService;
+import com.vn.ptit.duongvct.util.JMeterAutoStopUtil;
 import com.vn.ptit.duongvct.util.JTLParser;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 
 import static us.abstracta.jmeter.javadsl.JmeterDsl.*;
 import static us.abstracta.jmeter.javadsl.JmeterDsl.jtlWriter;
+import static us.abstracta.jmeter.javadsl.core.listeners.AutoStopListener.AutoStopCondition.*;
 
 @Service
 public class TestRunServiceImpl implements TestRunService {
@@ -128,6 +130,9 @@ public class TestRunServiceImpl implements TestRunService {
             dslTestPlan.saveAsJmx("jmeter/jmx/" + fileName + ".jmx");
             logger.info("Executing JMeter test for plan: {}", testPlan.getTitle());
 //            dslTestPlan.showTimeline();
+//            dslTestPlan.children(autoStop().when(latencyTime().max().greaterThanOrEqualTo(Duration.ofMillis(100))));
+//            dslTestPlan.children(autoStop().when(samples().total().greaterThanOrEqualTo((long) 6)).when(latencyTime().max().greaterThanOrEqualTo(Duration.ofMillis(300))));
+            JMeterAutoStopUtil.applyAutoStopConfigurations(dslTestPlan, testPlan);
             TestPlanStats stats = dslTestPlan.run();
             long executionTime = System.currentTimeMillis() - startTime;
             logger.info("Test execution completed in {}ms for plan: {}", executionTime, testPlan.getTitle());

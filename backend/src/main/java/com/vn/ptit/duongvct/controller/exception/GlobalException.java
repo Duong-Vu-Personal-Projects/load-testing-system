@@ -12,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import us.abstracta.jmeter.javadsl.core.engines.AutoStoppedTestException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,5 +66,12 @@ public class GlobalException {
         Object message = errors.size() > 1 ? errors : errors.get(0);
         ApiResponse<Object> res = new ApiResponse<>(HttpStatus.BAD_REQUEST, message, null, ex.getBody().getDetail());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+    @ExceptionHandler(AutoStoppedTestException.class)
+    public ResponseEntity<ApiResponse<?>> handleAutoStoppedTestJMeterException(AutoStoppedTestException exception) {
+        String requestId = MDC.get("requestId");
+        logger.warn("JMeter run has been auto stopped,  [requestId={}]: {}", requestId, exception.getMessage());
+        var result = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), null, "INTERNAL_SERVER_ERROR");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
     }
 }
