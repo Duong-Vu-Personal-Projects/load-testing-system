@@ -7,8 +7,10 @@ import { editTestPlanAPI, getTestPlanDetailAPI } from "../../../../services/api"
 import TestPlanHeader from '../create-test-plan/test.plan.header';
 import ThreadGroupForm from '../create-test-plan/thread.group.form';
 import RpsThreadGroupForm from "../create-test-plan/rps.thread.group.form";
+import AutoStopConfig from '../create-test-plan/auto-stop/auto.stop.config';
+import AutoStopPresets from "../create-test-plan/auto-stop/auto.stop.preset.tsx";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const EditTestPlan: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -124,7 +126,24 @@ const EditTestPlan: React.FC = () => {
             >
                 {/* Test Plan Title */}
                 <TestPlanHeader />
+                {/* Add Global Auto-Stop Configuration */}
+                <Divider orientation="left">Global Auto-Stop</Divider>
 
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                    <Text type="secondary">
+                        Configure global auto-stop conditions for the entire test plan. This will override individual thread group settings.
+                    </Text>
+
+                    <AutoStopPresets
+                        onApplyPreset={(preset) => {
+                            form.setFieldsValue({
+                                globalAutoStop: preset
+                            });
+                        }}
+                    />
+                </div>
+
+                <AutoStopConfig namePrefix="globalAutoStop" />
                 <Divider orientation="left">Load Configuration</Divider>
 
                 {/* Thread Groups Tabs */}

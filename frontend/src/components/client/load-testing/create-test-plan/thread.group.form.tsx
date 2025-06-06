@@ -1,13 +1,12 @@
 import React from 'react';
-import {Form, Input, InputNumber, Button, Card, Space, Switch} from 'antd';
+import {Form, Input, InputNumber, Button, Card, Space, Switch, Divider, Typography} from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { IThreadStageGroup } from './type.test.plan';
+import AutoStopPresets from "./auto-stop/auto.stop.preset.tsx";
+import AutoStopConfig from './auto-stop/auto.stop.config';
 
-interface IThreadGroupFormProps {
-    // No specific props needed as it uses Form.List context
-}
-
-const ThreadGroupForm: React.FC<IThreadGroupFormProps> = () => {
+const { Text } = Typography;
+const ThreadGroupForm: React.FC = () => {
     const defaultThreadGroup: IThreadStageGroup = {
         url: 'https://',
         rampDuration: 0,
@@ -17,7 +16,7 @@ const ThreadGroupForm: React.FC<IThreadGroupFormProps> = () => {
         holdIteration: 2,
         followRedirects: true
     };
-
+    const form = Form.useFormInstance();
     return (
         <Form.List name="threadStageGroups">
             {(fields, { add, remove }) => (
@@ -26,9 +25,19 @@ const ThreadGroupForm: React.FC<IThreadGroupFormProps> = () => {
                         <Card
                             key={key}
                             title={`Thread Group ${name + 1}`}
-                            extra={fields.length > 1 ? <DeleteOutlined onClick={() => remove(name)} /> : null}
+                            extra={
+                                fields.length > 1 ? (
+                                    <Button
+                                        type="text"
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                        onClick={() => remove(name)}
+                                    />
+                                ) : null
+                            }
                             style={{ marginBottom: 16 }}
                         >
+
                             <Form.Item
                                 {...restField}
                                 name={[name, 'url']}
@@ -95,6 +104,34 @@ const ThreadGroupForm: React.FC<IThreadGroupFormProps> = () => {
                             >
                                 <InputNumber min={0} />
                             </Form.Item>
+                            {/* Add Auto-Stop Configuration */}
+                            <Divider orientation="left">Auto-Stop Configuration</Divider>
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                                <Text type="secondary">
+                                    Configure conditions that will automatically stop the test when met
+                                </Text>
+
+                                <AutoStopPresets
+                                    onApplyPreset={(preset) => {
+                                        // Define a correctly typed function to set field values
+                                        const applyPreset = () => {
+                                            // Convert name to string to avoid type issues
+                                            const nameStr = name.toString();
+                                            form.setFieldsValue({
+                                                threadStageGroups: {
+                                                    [nameStr]: {
+                                                        autoStop: preset
+                                                    }
+                                                }
+                                            });
+                                        };
+                                        applyPreset();
+                                    }}
+                                />
+                            </div>
+
+                            <AutoStopConfig namePrefix={["threadStageGroups", name.toString(), 'autoStop']} />
                         </Card>
                     ))}
 

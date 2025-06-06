@@ -6,6 +6,7 @@ export interface IThreadStageGroup {
     rampToThreads: number;
     throughputTimer: number;
     holdIteration: number;
+    autoStop?: IAutoStopConfig;
 }
 
 export interface IRpsThreadStageGroup {
@@ -16,11 +17,13 @@ export interface IRpsThreadStageGroup {
     rampToThreads: number;
     throughputTimer: number;
     maxThreads: number;
+    autoStop?: IAutoStopConfig;
 }
 export interface IRequestCreateTestPlan {
     title: string,
-    threadStageGroups: IThreadStageGroup[],
-    rpsThreadStageGroups: IRpsThreadStageGroup[]
+    threadStageGroups: IThreadStageGroup[];
+    rpsThreadStageGroups: IRpsThreadStageGroup[];
+    globalAutoStop?: IAutoStopConfig;
 }
 export interface IRequestRunTestPlan {
     id: string;
@@ -30,6 +33,7 @@ export interface ITestPlan {
     title: string,
     threadStageGroups: IThreadStageGroup[],
     rpsThreadStageGroups: IRpsThreadStageGroup[]
+    globalAutoStop?: IAutoStopConfig;
 }
 export interface IHttpConfig {
     httpMethod: string;
@@ -43,11 +47,7 @@ export interface ITestPlanFormValues {
     title: string;
     threadStageGroups: IThreadStageGroup[];
     rpsThreadStageGroups: IRpsThreadStageGroup[];
-    httpMethod: string;
-    followRedirects: boolean;
-    headers: { key: string; value: string }[];
-    requestBody?: string;
-    contentType?: string;
+    globalAutoStop?: IAutoStopConfig;
 }
 
 export interface ITestResultStats {
@@ -112,3 +112,69 @@ export interface ITestResultDTO {
     // Throughput data: [second, count]
     throughputData: Array<[number, number]>;
 }
+export type AutoStopMetricType =
+    | 'latencyTime'
+    | 'sampleTime'
+    | 'connectionTime'
+    | 'samples'
+    | 'errors'
+    | 'sentBytes'
+    | 'receivedBytes';
+
+export type AutoStopAggregation =
+    | 'min'
+    | 'max'
+    | 'mean'
+    | 'percentile'
+    | 'total'
+    | 'perSecond'
+    | 'percent';
+
+export type AutoStopComparison =
+    | 'lessThan'
+    | 'lessThanOrEqual'
+    | 'greaterThan'
+    | 'greaterThanOrEqual';
+
+export interface IAutoStopCondition {
+    metricType: AutoStopMetricType;
+    aggregation: AutoStopAggregation;
+    percentile?: number; // Only used when aggregation is PERCENTILE
+    comparison: AutoStopComparison;
+    thresholdValue: number;
+    holdForDuration?: number; // In seconds
+    aggregationResetPeriod?: number; // In seconds
+}
+
+export interface IAutoStopConfig {
+    enabled: boolean;
+    name?: string;
+    samplePattern?: string;
+    conditions: IAutoStopCondition[];
+}
+export const AutoStopMetricTypes = {
+    LATENCY_TIME: 'latencyTime' as AutoStopMetricType,
+    SAMPLE_TIME: 'sampleTime' as AutoStopMetricType,
+    CONNECTION_TIME: 'connectionTime' as AutoStopMetricType,
+    SAMPLES: 'samples' as AutoStopMetricType,
+    ERRORS: 'errors' as AutoStopMetricType,
+    SENT_BYTES: 'sentBytes' as AutoStopMetricType,
+    RECEIVED_BYTES: 'receivedBytes' as AutoStopMetricType
+};
+
+export const AutoStopAggregations = {
+    MIN: 'min' as AutoStopAggregation,
+    MAX: 'max' as AutoStopAggregation,
+    MEAN: 'mean' as AutoStopAggregation,
+    PERCENTILE: 'percentile' as AutoStopAggregation,
+    TOTAL: 'total' as AutoStopAggregation,
+    PER_SECOND: 'perSecond' as AutoStopAggregation,
+    PERCENT: 'percent' as AutoStopAggregation
+};
+
+export const AutoStopComparisons = {
+    LESS_THAN: 'lessThan' as AutoStopComparison,
+    LESS_THAN_OR_EQUAL: 'lessThanOrEqual' as AutoStopComparison,
+    GREATER_THAN: 'greaterThan' as AutoStopComparison,
+    GREATER_THAN_OR_EQUAL: 'greaterThanOrEqual' as AutoStopComparison
+};

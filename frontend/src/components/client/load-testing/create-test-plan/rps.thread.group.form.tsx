@@ -1,13 +1,13 @@
 import React from 'react';
-import {Form, Input, InputNumber, Button, Card, Space, Switch} from 'antd';
+import {Form, Input, InputNumber, Button, Card, Space, Switch, Typography, Divider} from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import type {IRpsThreadStageGroup} from "./type.test.plan.tsx";
+import AutoStopConfig from './auto-stop/auto.stop.config.tsx';
+import AutoStopPresets from './auto-stop/auto.stop.preset.tsx';
 
-interface IRpsThreadGroupFormProps {
-    // No specific props needed as it uses Form.List context
-}
-
-const RpsThreadGroupForm: React.FC<IRpsThreadGroupFormProps> = () => {
-    const defaultRpsThreadGroup: IRpsThreadGroupFormProps = {
+const { Text } = Typography;
+const RpsThreadGroupForm: React.FC = () => {
+    const defaultRpsThreadGroup: IRpsThreadStageGroup = {
         url: 'https://',
         rampDuration: 0,
         holdDuration: 0,
@@ -16,7 +16,7 @@ const RpsThreadGroupForm: React.FC<IRpsThreadGroupFormProps> = () => {
         maxThreads: 5,
         followRedirects: true
     };
-
+    const form = Form.useFormInstance();
     return (
         <Form.List name="rpsThreadStageGroups">
             {(fields, { add, remove }) => (
@@ -25,7 +25,16 @@ const RpsThreadGroupForm: React.FC<IRpsThreadGroupFormProps> = () => {
                         <Card
                             key={key}
                             title={`RPS Thread Group ${name + 1}`}
-                            extra={<DeleteOutlined onClick={() => remove(name)} />}
+                            extra={
+                                fields.length > 1 ? (
+                                    <Button
+                                        type="text"
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                        onClick={() => remove(name)}
+                                    />
+                                ) : null
+                            }
                             style={{ marginBottom: 16 }}
                         >
                             <Form.Item
@@ -94,6 +103,32 @@ const RpsThreadGroupForm: React.FC<IRpsThreadGroupFormProps> = () => {
                             >
                                 <InputNumber min={0} />
                             </Form.Item>
+                            {/* Add Auto-Stop Configuration */}
+                            <Divider orientation="left">Auto-Stop Configuration</Divider>
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                                <Text type="secondary">
+                                    Configure conditions that will automatically stop the test when met
+                                </Text>
+
+                                <AutoStopPresets
+                                    onApplyPreset={(preset) => {
+                                        const applyPreset = () => {
+                                            const nameStr = name.toString();
+                                            form.setFieldsValue({
+                                                rpsThreadStageGroups: {
+                                                    [nameStr]: {
+                                                        autoStop: preset
+                                                    }
+                                                }
+                                            });
+                                        };
+                                        applyPreset();
+                                    }}
+                                />
+                            </div>
+
+                            <AutoStopConfig namePrefix={["rpsThreadStageGroups", name.toString(), 'autoStop']} />
                         </Card>
                     ))}
 

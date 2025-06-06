@@ -10,6 +10,7 @@ import {
 import { getTestPlanDetailAPI, runTestPlanAPI } from "../../../../services/api.ts";
 import type {IThreadStageGroup, IRpsThreadStageGroup, ITestPlan} from "../create-test-plan/type.test.plan.tsx";
 import TestPlanSchedule from '../schedule/test.plan.schedule.tsx';
+import RenderAutoStopConfig from "./auto-stop-config/render.auto.stop.config.tsx";
 
 const { Title } = Typography;
 
@@ -149,6 +150,10 @@ const TestPlanDetail: React.FC = () => {
             <Descriptions.Item label="Follow Redirects">
               {group.followRedirects ? 'Yes' : 'No'}
             </Descriptions.Item>
+            {/* Add Auto-Stop Configuration */}
+            <Descriptions.Item label="Auto-Stop" span={3}>
+              {RenderAutoStopConfig(group.autoStop)}
+            </Descriptions.Item>
           </Descriptions>
       ),
     }));
@@ -185,6 +190,10 @@ const TestPlanDetail: React.FC = () => {
             <Descriptions.Item label="Follow Redirects">
               {group.followRedirects ? 'Yes' : 'No'}
             </Descriptions.Item>
+            {/* Add Auto-Stop Configuration */}
+            <Descriptions.Item label="Auto-Stop" span={3}>
+              {RenderAutoStopConfig(group.autoStop)}
+            </Descriptions.Item>
           </Descriptions>
       ),
     }));
@@ -207,6 +216,10 @@ const TestPlanDetail: React.FC = () => {
               <Descriptions.Item label="Title">{testPlanData.title}</Descriptions.Item>
               <Descriptions.Item label="Thread Groups">{testPlanData.threadStageGroups?.length || 0}</Descriptions.Item>
               <Descriptions.Item label="RPS Groups">{testPlanData.rpsThreadStageGroups?.length || 0}</Descriptions.Item>
+              {/* Add Global Auto-Stop */}
+              <Descriptions.Item label="Global Auto-Stop" span={4}>
+                {RenderAutoStopConfig(testPlanData.globalAutoStop)}
+              </Descriptions.Item>
             </Descriptions>
 
             {/* Thread Stage Groups */}

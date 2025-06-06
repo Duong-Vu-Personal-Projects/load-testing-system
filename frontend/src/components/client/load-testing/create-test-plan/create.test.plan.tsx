@@ -7,20 +7,17 @@ import TestPlanHeader from './test.plan.header.tsx';
 import ThreadGroupForm from './thread.group.form.tsx';
 import RpsThreadGroupForm from "./rps.thread.group.form.tsx";
 import {useNavigate} from "react-router-dom";
+import AutoStopConfig from './auto-stop/auto.stop.config.tsx';
+import AutoStopPresets from './auto-stop/auto.stop.preset.tsx';
 
 const CreateTestPlan: React.FC = () => {
-  const { Title } = Typography;
+  const { Title, Text } = Typography;
   const { TabPane } = Tabs;
 
   const initialValues: ITestPlanFormValues = {
     title: '',
     threadStageGroups: [],
     rpsThreadStageGroups: [],
-    httpMethod: 'GET',
-    followRedirects: true,
-    headers: [{ key: 'Content-Type', value: 'application/json' }],
-    requestBody: '',
-    contentType: 'application/json'
   };
   const [form] = Form.useForm<ITestPlanFormValues>();
   const [loading, setLoading] = useState(false);
@@ -72,7 +69,24 @@ const CreateTestPlan: React.FC = () => {
         >
           {/* Test Plan Title */}
           <TestPlanHeader />
+          {/* Add Global Auto-Stop Configuration */}
+          <Divider orientation="left">Global Auto-Stop</Divider>
 
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+            <Text type="secondary">
+              Configure global auto-stop conditions for the entire test plan. This will override individual thread group settings.
+            </Text>
+
+            <AutoStopPresets
+                onApplyPreset={(preset) => {
+                  form.setFieldsValue({
+                    globalAutoStop: preset
+                  });
+                }}
+            />
+          </div>
+
+          <AutoStopConfig namePrefix="globalAutoStop" />
           <Divider orientation="left">Load Configuration</Divider>
 
           {/* Thread Groups Tabs */}
