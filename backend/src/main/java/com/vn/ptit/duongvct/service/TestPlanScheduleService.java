@@ -2,6 +2,7 @@ package com.vn.ptit.duongvct.service;
 
 import com.vn.ptit.duongvct.domain.testplan.schedule.TestPlanSchedule;
 import com.vn.ptit.duongvct.dto.request.schedule.RequestCreateScheduleDTO;
+import com.vn.ptit.duongvct.dto.request.schedule.RequestEditScheduleDTO;
 import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.schedule.ResponseScheduleDTO;
 import org.springframework.data.domain.Pageable;
@@ -22,5 +23,6 @@ public interface TestPlanScheduleService {
     PaginationResponse searchSchedulesByName(String testPlanId, String name, Pageable pageable);
     PaginationResponse searchSchedulesByStatus(String testPlanId,boolean enabled, Pageable pageable);
     PaginationResponse searchSchedulesByNextRunTime(String testPlanId, LocalDateTime start, LocalDateTime end, Pageable pageable);
+    ResponseScheduleDTO editSchedule(RequestEditScheduleDTO dto);
 
 }
