@@ -68,3 +68,4 @@ Build a complete web platform that automates the entire performance testing (loa
 - Degree of automation and practical effectiveness of the testing and bottleneck detection system
 - Accuracy and efficiency of AI/ML algorithms
 - Quality of technical documentation, deployment guides, and result reports
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Duong-Vu-Personal-Projects/load-testing-system)
