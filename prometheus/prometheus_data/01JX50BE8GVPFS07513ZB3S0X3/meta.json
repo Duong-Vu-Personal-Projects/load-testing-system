@@ -1,0 +1,17 @@
+{
+	"ulid": "01JX50BE8GVPFS07513ZB3S0X3",
+	"minTime": 1749219778267,
+	"maxTime": 1749225600000,
+	"stats": {
+		"numSamples": 71965,
+		"numSeries": 860,
+		"numChunks": 860
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01JX50BE8GVPFS07513ZB3S0X3"
+		]
+	},
+	"version": 1
+}
