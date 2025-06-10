@@ -1,0 +1,17 @@
+{
+	"ulid": "01JXBYG6WSA1PP55E37TD60R6T",
+	"minTime": 1749515713269,
+	"maxTime": 1749520800000,
+	"stats": {
+		"numSamples": 16841,
+		"numSeries": 620,
+		"numChunks": 620
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01JXBYG6WSA1PP55E37TD60R6T"
+		]
+	},
+	"version": 1
+}
