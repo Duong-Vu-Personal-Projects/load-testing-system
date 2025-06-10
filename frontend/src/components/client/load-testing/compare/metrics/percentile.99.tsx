@@ -17,7 +17,7 @@ const Percentile99Comparison = (props: ICompareTestRun) => {
                     </Col>
                     <Col span={12}>
                         <Statistic
-                            title={testRun1.title}
+                            title={testRun2.title}
                             value={testRun2.stats.sampleTimePercentile99}
                             suffix="ms"
                             valueStyle={{

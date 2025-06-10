@@ -7,7 +7,7 @@ const TotalRequestComparison = (props: ICompareTestRun) => {
     const {Text} = Typography;
     return (
         <>
-            <Card type="inner" title="Total Requests">
+            <Card type="inner" title="Total Samples Count">
                 <Row gutter={16}>
                     <Col span={12}>
                         <Statistic
