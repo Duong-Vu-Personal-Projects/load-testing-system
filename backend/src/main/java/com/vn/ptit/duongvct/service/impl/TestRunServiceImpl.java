@@ -115,6 +115,7 @@ public class TestRunServiceImpl implements TestRunService {
                     rpsThreadGroup.children(throughputTimer(stage.getThroughputTimer()));
                 }
                 rpsThreadGroup.children(httpSampler(stage.getUrl()).followRedirects(stage.isFollowRedirects()));
+                rpsThreadGroup.maxThreads(stage.getMaxThreads());
                 rpThreadGroups.add(rpsThreadGroup);
             }
             DslTestPlan dslTestPlan = testPlan();
