@@ -53,14 +53,14 @@ const ErrorRateComparisonChart: React.FC<IErrorRateComparisonProps> = (props: IE
                     <Pie
                         {...config1}
                     />
-                    Error Rate: {errorRateComparison.run1ErrorRate.toFixed(2)} %
+                    Error Rate: {(errorRateComparison.run1ErrorRate * 100).toFixed(2)} %
                 </div>
                 <div style={{ flex: 1, textAlign: 'center' }}>
                     <Title level={5}>{testRun2.title}</Title>
                     <Pie
                         {...config2}
                     />
-                    Error Rate: {errorRateComparison.run2ErrorRate.toFixed(2)}%
+                    Error Rate: {(errorRateComparison.run2ErrorRate * 100).toFixed(2)}%
                 </div>
             </div>
         </Card>

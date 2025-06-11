@@ -6,7 +6,7 @@ const Percentile99Comparison = (props: ICompareTestRun) => {
     const {testRun1, testRun2} = props;
     return (
         <>
-            <Card type="inner" title="90th Percentile">
+            <Card type="inner" title="99th Percentile">
                 <Row gutter={16}>
                     <Col span={12}>
                         <Statistic
