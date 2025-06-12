@@ -9,14 +9,14 @@ const TestDurationComparison = (props: ICompareTestRun) => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Statistic
-                            title="Run 1"
+                            title={testRun1.title}
                             value={(testRun1.stats.duration / 1000).toFixed(2)}
                             suffix="s"
                         />
                     </Col>
                     <Col span={12}>
                         <Statistic
-                            title="Run 2"
+                            title={testRun2.title}
                             value={(testRun2.stats.duration / 1000).toFixed(2)}
                             suffix="s"
                         />

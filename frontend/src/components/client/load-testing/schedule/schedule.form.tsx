@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Form, Input, Select, DatePicker, Modal, Typography } from 'antd';
-import {EScheduleType, type IRequestCreateSchedule} from "./type.schedule.tsx";
+import React, { useState, useEffect } from 'react';
+import { Form, Input, Select, DatePicker, Modal } from 'antd';
+import { EScheduleType, type IRequestCreateSchedule, type ISchedule } from "./type.schedule.tsx";
 import CronHelper from "./cron.helper.tsx";
+import dayjs from 'dayjs';
 
 const { TextArea } = Input;
 const { Option } = Select;
-const { Text } = Typography;
+
 
 interface IScheduleFormProps {
     testPlanId: string;
@@ -13,6 +14,8 @@ interface IScheduleFormProps {
     onCancel: () => void;
     onSubmit: (values: IRequestCreateSchedule) => Promise<void>;
     confirmLoading: boolean;
+    editSchedule?: ISchedule | null; // New prop for editing
+    title?: string; // Custom title for the modal
 }
 
 const ScheduleForm: React.FC<IScheduleFormProps> = (props: IScheduleFormProps) => {
@@ -21,10 +24,41 @@ const ScheduleForm: React.FC<IScheduleFormProps> = (props: IScheduleFormProps) =
         visible,
         onCancel,
         onSubmit,
-        confirmLoading
+        confirmLoading,
+        editSchedule,
+        title = editSchedule ? "Edit Schedule" : "Create Schedule"
     } = props;
+
     const [form] = Form.useForm();
-    const [scheduleType, setScheduleType] = useState<EScheduleType>(EScheduleType.ONCE);
+    const [scheduleType, setScheduleType] = useState<EScheduleType>(
+        editSchedule ? editSchedule.type : EScheduleType.ONCE
+    );
+
+    // Initialize form when editing or reset when creating
+    useEffect(() => {
+        if (visible) {
+            if (editSchedule) {
+                // Fill form with existing schedule data
+                form.setFieldsValue({
+                    name: editSchedule.name,
+                    type: editSchedule.type,
+                    description: editSchedule.description,
+                    // For ONCE type, convert execution time to dayjs object
+                    executionTime: editSchedule.type === EScheduleType.ONCE && editSchedule.executionTime
+                        ? dayjs(editSchedule.executionTime)
+                        : undefined,
+                    cronExpression: editSchedule.type === EScheduleType.RECURRING
+                        ? editSchedule.cronExpression
+                        : undefined
+                });
+                setScheduleType(editSchedule.type);
+            } else {
+                // Reset form for creation
+                form.resetFields();
+                setScheduleType(EScheduleType.ONCE);
+            }
+        }
+    }, [visible, editSchedule, form]);
 
     const handleTypeChange = (value: EScheduleType) => {
         setScheduleType(value);
@@ -50,18 +84,15 @@ const ScheduleForm: React.FC<IScheduleFormProps> = (props: IScheduleFormProps) =
 
             // For ONCE type, preserve local time
             if (values.type === EScheduleType.ONCE && values.executionTime) {
-                // Format date in local timezone instead of using toISOString()
-                const localDate = values.executionTime;
-
-                // Create ISO string but remove the 'Z' to indicate it's local time
-                // This formatted date will be interpreted as local time by the backend
-                request.executionTime = localDate.format('YYYY-MM-DDTHH:mm:ss');
+                request.executionTime = values.executionTime.format('YYYY-MM-DDTHH:mm:ss');
             } else if (values.cronExpression) {
                 request.cronExpression = values.cronExpression;
             }
 
             await onSubmit(request);
-            form.resetFields();
+            if (!editSchedule) { // Only reset on creation
+                form.resetFields();
+            }
         } catch (error) {
             console.error('Validation failed:', error);
         }
@@ -79,7 +110,7 @@ const ScheduleForm: React.FC<IScheduleFormProps> = (props: IScheduleFormProps) =
 
     return (
         <Modal
-            title="Create Schedule"
+            title={title}
             open={visible}
             onOk={handleSubmit}
             confirmLoading={confirmLoading}
@@ -89,7 +120,7 @@ const ScheduleForm: React.FC<IScheduleFormProps> = (props: IScheduleFormProps) =
             <Form
                 form={form}
                 layout="vertical"
-                initialValues={{ type: EScheduleType.ONCE }}
+                initialValues={{ type: scheduleType }}
             >
                 <Form.Item
                     name="name"
@@ -104,9 +135,9 @@ const ScheduleForm: React.FC<IScheduleFormProps> = (props: IScheduleFormProps) =
                     label="Schedule Type"
                     rules={[{ required: true, message: 'Please select a type' }]}
                 >
-                    <Select onChange={(value) => handleTypeChange(value as EScheduleType)}>
-                        <Option value={EScheduleType.ONCE}>One-time execution</Option>
-                        <Option value={EScheduleType.RECURRING}>Recurring (Cron)</Option>
+                    <Select onChange={handleTypeChange}>
+                        <Option value={EScheduleType.ONCE}>One Time</Option>
+                        <Option value={EScheduleType.RECURRING}>Recurring</Option>
                     </Select>
                 </Form.Item>
 
@@ -114,7 +145,7 @@ const ScheduleForm: React.FC<IScheduleFormProps> = (props: IScheduleFormProps) =
                     <Form.Item
                         name="executionTime"
                         label="Execution Time"
-                        rules={[{ required: true, message: 'Please select execution time' }]}
+                        rules={[{ required: true, message: 'Please select an execution time' }]}
                     >
                         <DatePicker
                             showTime
@@ -124,32 +155,35 @@ const ScheduleForm: React.FC<IScheduleFormProps> = (props: IScheduleFormProps) =
                         />
                     </Form.Item>
                 ) : (
-                    <Form.Item
-                        name="cronExpression"
-                        label="Cron Expression"
-                        rules={[{ required: true, message: 'Please enter cron expression' }]}
-                        extra={
-                            <div>
+                    <>
+                        <Form.Item
+                            name="cronExpression"
+                            label="Cron Expression"
+                            rules={[{ required: true, message: 'Please enter a cron expression' }]}
+                            extra={
+                                <div>
                                 <div>For Cron expression, check <a href={'https://crontab.guru/'}>here</a></div>
                                 <div>But that is the helper for cron job in linux, in backend the cron expression is little different:</div>
                                 <div>Backend needs 6 params, with the first param is seconds</div>
                                 <div>Examples:</div>
-                                <div>- Every day at 8:00 AM: <Text code>0 0 8 * * *</Text></div>
-                                <div>- Every Monday at 9:00 AM: <Text code>0 0 9 * * MON</Text></div>
-                                <div>- Every 30 minutes: <Text code>0 */30 * * * *</Text></div>
-                                <CronHelper onChange={handleCronExpressionChange} />
-                            </div>
-                        }
-                    >
-                        <Input placeholder="Enter cron expression" />
-                    </Form.Item>
+                                <div>- Every day at 8:00 AM: 0 0 8 * * *</div>
+                                <div>- Every Monday at 9:00 AM: 0 0 9 * * MON</div>
+                                <div>- Every 30 minutes:0 */30 * * * *</div>
+
+                    </div>
+                }
+                        >
+                            <Input placeholder="Enter cron expression" />
+                        </Form.Item>
+                        <CronHelper onChange={handleCronExpressionChange} />
+                    </>
                 )}
 
                 <Form.Item
                     name="description"
                     label="Description"
                 >
-                    <TextArea rows={3} placeholder="Enter description" />
+                    <TextArea rows={3} placeholder="Enter schedule description (optional)" />
                 </Form.Item>
             </Form>
         </Modal>

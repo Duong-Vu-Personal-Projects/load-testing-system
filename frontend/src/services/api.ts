@@ -5,7 +5,7 @@ import type {
     ITestPlan
 } from "../components/client/load-testing/create-test-plan/type.test.plan.tsx";
 import type {
-    IRequestCreateSchedule,
+    IRequestCreateSchedule, IRequestEditSchedule,
     IResponseSchedule
 } from "../components/client/load-testing/schedule/type.schedule.tsx";
 
@@ -142,4 +142,7 @@ export const searchSchedulesByExecutionTimeAPI = (
     pageSize: number = 10
 ) => {
     return axios.get(`/api/v1/search/schedules/by-execution-time?testPlanId=${testPlanId}&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&page=${page}&size=${pageSize}`);
+};
+export const updateScheduleAPI = (data: IRequestEditSchedule) => {
+    return axios.put<IResponseSchedule>(`/api/v1/schedule`, data);
 };

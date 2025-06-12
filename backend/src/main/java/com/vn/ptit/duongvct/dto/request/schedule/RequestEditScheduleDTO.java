@@ -4,7 +4,6 @@ import com.vn.ptit.duongvct.constant.ScheduleType;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +11,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class RequestCreateScheduleDTO {
+public class RequestEditScheduleDTO {
+    @NotBlank(message = "Test Plan Schedule ID must not be null")
+    private String id;
     @NotBlank
     private String testPlanId;
     @NotBlank

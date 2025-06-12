@@ -1,6 +1,7 @@
 package com.vn.ptit.duongvct.controller;
 
 import com.vn.ptit.duongvct.dto.request.schedule.RequestCreateScheduleDTO;
+import com.vn.ptit.duongvct.dto.request.schedule.RequestEditScheduleDTO;
 import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.schedule.ResponseScheduleDTO;
 import com.vn.ptit.duongvct.service.TestPlanScheduleService;
@@ -46,6 +47,12 @@ public class TestPlanScheduleController {
     @ApiMessage("Toggle schedule active status")
     public ResponseEntity<ResponseScheduleDTO> toggleScheduleStatus(@PathVariable String scheduleId) {
         ResponseScheduleDTO schedule = scheduleService.toggleScheduleStatus(scheduleId);
+        return ResponseEntity.ok(schedule);
+    }
+    @PutMapping
+    @ApiMessage("Edit test plan schedule")
+    public ResponseEntity<ResponseScheduleDTO> editSchedule(@RequestBody RequestEditScheduleDTO dto) {
+        ResponseScheduleDTO schedule = scheduleService.editSchedule(dto);
         return ResponseEntity.ok(schedule);
     }
 

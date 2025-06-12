@@ -115,6 +115,7 @@ public class TestRunServiceImpl implements TestRunService {
                     rpsThreadGroup.children(throughputTimer(stage.getThroughputTimer()));
                 }
                 rpsThreadGroup.children(httpSampler(stage.getUrl()).followRedirects(stage.isFollowRedirects()));
+                rpsThreadGroup.maxThreads(stage.getMaxThreads());
                 rpThreadGroups.add(rpsThreadGroup);
             }
             DslTestPlan dslTestPlan = testPlan();
@@ -127,6 +128,7 @@ public class TestRunServiceImpl implements TestRunService {
             dslTestPlan.children(jtlWriter(directory, fileName));
             dslTestPlan.saveAsJmx("jmeter/jmx/" + fileName + ".jmx");
             logger.info("Executing JMeter test for plan: {}", testPlan.getTitle());
+//            dslTestPlan.showTimeline();
             TestPlanStats stats = dslTestPlan.run();
             long executionTime = System.currentTimeMillis() - startTime;
             logger.info("Test execution completed in {}ms for plan: {}", executionTime, testPlan.getTitle());

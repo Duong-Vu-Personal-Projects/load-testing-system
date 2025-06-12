@@ -26,7 +26,7 @@ const ResultsSummary: React.FC<IResultsSummaryProps> = ({ testResults }) => {
                     </Card>
 
                     <Card size="small" title="Throughput">
-                        <Text>Total Requests: {stats.sampleCounts || 'N/A'}</Text><br />
+                        <Text>Total Samples count: {stats.sampleCounts || 'N/A'}</Text><br />
                         <Text>Error Count: {stats.errorCount || 0}</Text><br />
                         <Text>Error Rate: {stats.errorRate ? (stats.errorRate * 100).toFixed(2) : '0'}%</Text><br />
                     </Card>

@@ -4,6 +4,7 @@ import com.vn.ptit.duongvct.constant.ScheduleType;
 import com.vn.ptit.duongvct.domain.testplan.TestPlan;
 import com.vn.ptit.duongvct.domain.testplan.schedule.TestPlanSchedule;
 import com.vn.ptit.duongvct.dto.request.schedule.RequestCreateScheduleDTO;
+import com.vn.ptit.duongvct.dto.request.schedule.RequestEditScheduleDTO;
 import com.vn.ptit.duongvct.dto.request.testrun.RequestTestRunDTO;
 import com.vn.ptit.duongvct.dto.response.PaginationResponse;
 import com.vn.ptit.duongvct.dto.response.testplan.schedule.ResponseScheduleDTO;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
@@ -40,47 +43,36 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         this.mapper = mapper;
     }
 
-
     @Override
     public ResponseScheduleDTO createSchedule(RequestCreateScheduleDTO request) {
-        Optional<TestPlan> testPlanOpt = testPlanService.findById(request.getTestPlanId());
-        if (testPlanOpt.isEmpty()) {
-            throw new IllegalArgumentException("Test plan not found with id: " + request.getTestPlanId());
-        }
-        ArrayList<TestPlanSchedule> testPlanSchedules = scheduleRepository.findByName(request.getName());
-        for (TestPlanSchedule testPlanSchedule : testPlanSchedules) {
-            if (testPlanSchedule.getTestPlanId().equals(testPlanOpt.get().getId())) {
-                throw new IllegalArgumentException("Schedule name of a test plan named" + testPlanSchedule.getName() + " already exists: " + request.getName());
-            }
-        }
+        // Validate test plan existence
+        TestPlan testPlan = validateTestPlanExists(request.getTestPlanId());
 
+        // Validate schedule name uniqueness
+        validateScheduleNameUniqueness(request.getName(), request.getTestPlanId(), null);
 
+        // Create new schedule
         TestPlanSchedule schedule = new TestPlanSchedule();
         schedule.setTestPlanId(request.getTestPlanId());
         schedule.setName(request.getName());
         schedule.setType(request.getType());
         schedule.setDescription(request.getDescription());
-//        schedule.setCreatedAt(LocalDateTime.now());
-//        schedule.setUpdatedAt(LocalDateTime.now());
         schedule.setEnabled(true);
 
-        if (request.getType() == ScheduleType.ONCE) {
-            schedule.setExecutionTime(request.getExecutionTime());
-            schedule.setNextRunTime(request.getExecutionTime());
-        } else {
-            schedule.setCronExpression(request.getCronExpression());
-            schedule.setNextRunTime(calculateNextRunTime(schedule));
-        }
-        this.scheduleSearchRepository.save(schedule);
-        TestPlanSchedule savedSchedule = scheduleRepository.save(schedule);
-        return this.mapToResponseScheduleDTO(savedSchedule, testPlanOpt.get().getTitle());
+        // Set type-specific fields
+        setScheduleTypeSpecificFields(schedule, request.getType(),
+                request.getExecutionTime(), request.getCronExpression());
+
+        // Save the schedule
+        TestPlanSchedule savedSchedule = saveSchedule(schedule);
+
+        return mapToResponseScheduleDTO(savedSchedule, testPlan.getTitle());
     }
 
     @Override
     public Optional<TestPlanSchedule> findById(String id) {
         return scheduleRepository.findById(id);
     }
-
 
     @Override
     public ArrayList<TestPlanSchedule> getSchedulesToRun() {
@@ -99,15 +91,9 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
 
             schedule.setLastRunTime(LocalDateTime.now());
 
-            // set enabled for once time and calculate next run time for scheduling
-            if (schedule.getType() == ScheduleType.ONCE) {
-                schedule.setEnabled(false);
-            } else {
-                LocalDateTime nextRun = calculateNextRunTime(schedule);
-                schedule.setNextRunTime(nextRun);
-            }
-            scheduleSearchRepository.save(schedule);
-            scheduleRepository.save(schedule);
+            // Update schedule based on its type
+            updateScheduleAfterExecution(schedule);
+
             logger.info("Successfully executed scheduled test: {}", schedule.getName());
         } catch (Exception e) {
             logger.error("Failed to execute scheduled test: {}", schedule.getName(), e);
@@ -116,27 +102,24 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
 
     @Override
     public ResponseScheduleDTO toggleScheduleStatus(String scheduleId) {
-        Optional<TestPlanSchedule> scheduleOpt = findById(scheduleId);
-        if (scheduleOpt.isEmpty()) {
-            throw new IllegalArgumentException("Schedule not found with id: " + scheduleId);
-        }
+        // Find schedule
+        TestPlanSchedule schedule = findScheduleById(scheduleId);
 
-        TestPlanSchedule schedule = scheduleOpt.get();
+        // Toggle status
         schedule.setEnabled(!schedule.isEnabled());
-//        schedule.setUpdatedAt(LocalDateTime.now());
 
-        // If enabling and it's a recurring schedule, recalculate next run time
+        // If enabling a recurring schedule, recalculate next run time
         if (schedule.isEnabled() && schedule.getType() == ScheduleType.RECURRING) {
             schedule.setNextRunTime(calculateNextRunTime(schedule));
         }
 
-        TestPlanSchedule savedSchedule = scheduleRepository.save(schedule);
-        scheduleSearchRepository.save(schedule);
-        Optional<TestPlan> testPlanOpt = testPlanService.findById(savedSchedule.getTestPlanId());
-        if (testPlanOpt.isEmpty()) {
-            throw new IllegalArgumentException("Cannot find test plan relate to schedule with id = " + savedSchedule.getTestPlanId());
-        }
-        return this.mapToResponseScheduleDTO(savedSchedule, savedSchedule.getTestPlanId());
+        // Save the updated schedule
+        TestPlanSchedule savedSchedule = saveSchedule(schedule);
+
+        // Get test plan title
+        String testPlanTitle = getTestPlanTitle(savedSchedule.getTestPlanId());
+
+        return mapToResponseScheduleDTO(savedSchedule, testPlanTitle);
     }
 
     @Override
@@ -147,32 +130,22 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
 
     @Override
     public PaginationResponse getSchedulesByTestPlanWithPagination(String testPlanId, Pageable pageable) {
-        Optional<TestPlan> testPlanOpt = testPlanService.findById(testPlanId);
-        if (testPlanOpt.isEmpty()) {
-            throw new IllegalArgumentException("Test plan not found with id: " + testPlanId);
-        }
-        String testPlanTitle = testPlanOpt.get().getTitle();
+        // Validate test plan existence and get title
+        String testPlanTitle = getTestPlanTitle(testPlanId);
 
+        // Get schedules page
         Page<TestPlanSchedule> pages = scheduleRepository.findPageByTestPlanId(pageable, testPlanId);
 
-        PaginationResponse response = new PaginationResponse();
-        PaginationResponse.Meta meta = new PaginationResponse.Meta();
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pages.getTotalPages());
-        meta.setTotal(pages.getTotalElements());
-        response.setMeta(meta);
-
-        ArrayList<ResponseScheduleDTO> scheduleDTOs = new ArrayList<>(pages.getContent().stream()
-                .map(schedule -> {
+        // Create mapper function that adds test plan title
+        Function<TestPlanSchedule, ResponseScheduleDTO> mapperWithTitle =
+                schedule -> {
                     ResponseScheduleDTO dto = mapper.map(schedule, ResponseScheduleDTO.class);
                     dto.setTestPlanTitle(testPlanTitle);
                     return dto;
-                })
-                .toList());
+                };
 
-        response.setResult(scheduleDTOs);
-        return response;
+        // Create and return pagination response
+        return createPaginationResponse(pages, pageable, mapperWithTitle);
     }
 
     @Override
@@ -181,6 +154,91 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         dto.setTestPlanTitle(testPlanTitle);
         return dto;
     }
+
+    @Override
+    public PaginationResponse searchSchedulesByName(String testPlanId, String name, Pageable pageable) {
+        // Get schedules page
+        Page<TestPlanSchedule> pages = scheduleRepository.findByTestPlanIdAndNameContainingIgnoreCase(testPlanId, name, pageable);
+
+        // Create mapper function that fetches test plan title for each schedule
+        Function<TestPlanSchedule, ResponseScheduleDTO> mapperWithDynamicTitle =
+                schedule -> {
+                    String title = getTestPlanTitle(schedule.getTestPlanId());
+                    return mapToResponseScheduleDTO(schedule, title);
+                };
+
+        // Create and return pagination response
+        return createPaginationResponse(pages, pageable, mapperWithDynamicTitle);
+    }
+
+    @Override
+    public PaginationResponse searchSchedulesByStatus(String testPlanId, boolean enabled, Pageable pageable) {
+        // Get schedules page
+        Page<TestPlanSchedule> pages = scheduleRepository.findByTestPlanIdAndEnabled(testPlanId, enabled, pageable);
+
+        // Create mapper function that fetches test plan title for each schedule
+        Function<TestPlanSchedule, ResponseScheduleDTO> mapperWithDynamicTitle =
+                schedule -> {
+                    String title = getTestPlanTitle(schedule.getTestPlanId());
+                    return mapToResponseScheduleDTO(schedule, title);
+                };
+
+        // Create and return pagination response
+        return createPaginationResponse(pages, pageable, mapperWithDynamicTitle);
+    }
+
+    @Override
+    public PaginationResponse searchSchedulesByNextRunTime(String testPlanId, LocalDateTime start, LocalDateTime end, Pageable pageable) {
+        // Get schedules page
+        Page<TestPlanSchedule> pages = scheduleRepository.findByTestPlanIdAndNextRunTimeBetween(testPlanId, start, end, pageable);
+
+        // Create mapper function that fetches test plan title for each schedule
+        Function<TestPlanSchedule, ResponseScheduleDTO> mapperWithDynamicTitle =
+                schedule -> {
+                    String title = getTestPlanTitle(schedule.getTestPlanId());
+                    return mapToResponseScheduleDTO(schedule, title);
+                };
+
+        // Create and return pagination response
+        return createPaginationResponse(pages, pageable, mapperWithDynamicTitle);
+    }
+
+    @Override
+    public ResponseScheduleDTO editSchedule(RequestEditScheduleDTO dto) {
+        logger.info("Start to edit schedule with id: {}", dto.getId());
+
+        // Find schedule
+        TestPlanSchedule schedule = findScheduleById(dto.getId());
+
+        // Validate test plan existence
+        TestPlan testPlan = validateTestPlanExists(dto.getTestPlanId());
+
+        // Validate schedule name uniqueness
+        if (!schedule.getName().equals(dto.getName())) {
+            validateScheduleNameUniqueness(dto.getName(), dto.getTestPlanId(), dto.getId());
+        }
+
+        // Update basic fields
+        schedule.setName(dto.getName());
+        schedule.setDescription(dto.getDescription());
+        schedule.setType(dto.getType());
+
+        // Set type-specific fields
+        setScheduleTypeSpecificFields(schedule, dto.getType(),
+                dto.getExecutionTime(), dto.getCronExpression());
+
+        // Save the updated schedule
+        TestPlanSchedule savedSchedule = saveSchedule(schedule);
+
+        logger.info("Edit test plan schedule successfully!");
+        return mapToResponseScheduleDTO(savedSchedule, testPlan.getTitle());
+    }
+
+    // ========== HELPER METHODS ==========
+
+    /**
+     * Calculate the next run time for a schedule based on its type and configuration
+     */
     private LocalDateTime calculateNextRunTime(TestPlanSchedule schedule) {
         LocalDateTime now = LocalDateTime.now();
 
@@ -200,9 +258,13 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         return now.plusDays(1);
     }
 
-    @Override
-    public PaginationResponse searchSchedulesByName(String testPlanId, String name, Pageable pageable) {
-        Page<TestPlanSchedule> pages = this.scheduleRepository.findByTestPlanIdAndNameContainingIgnoreCase(testPlanId, name, pageable);
+    /**
+     * Create a pagination response from a page of schedules
+     */
+    private PaginationResponse createPaginationResponse(
+            Page<TestPlanSchedule> pages,
+            Pageable pageable,
+            Function<TestPlanSchedule, ResponseScheduleDTO> mapper) {
 
         PaginationResponse response = new PaginationResponse();
         PaginationResponse.Meta meta = new PaginationResponse.Meta();
@@ -212,68 +274,105 @@ public class TestPlanScheduleServiceImpl implements TestPlanScheduleService {
         meta.setTotal(pages.getTotalElements());
         response.setMeta(meta);
 
-        ArrayList<ResponseScheduleDTO> scheduleDTOs = new ArrayList<>(pages.getContent().stream()
-                .map(schedule -> {
-                    // Get test plan title for each schedule
-                    Optional<TestPlan> testPlanOpt = testPlanService.findById(schedule.getTestPlanId());
-                    String testPlanTitle = testPlanOpt.isPresent() ? testPlanOpt.get().getTitle() : "Unknown";
-                    return mapToResponseScheduleDTO(schedule, testPlanTitle);
-                })
-                .toList());
+        ArrayList<ResponseScheduleDTO> scheduleDTOs = new ArrayList<>(
+                pages.getContent().stream()
+                        .map(mapper)
+                        .collect(Collectors.toList())
+        );
 
         response.setResult(scheduleDTOs);
         return response;
     }
 
-    @Override
-    public PaginationResponse searchSchedulesByStatus(String testPlanId, boolean enabled, Pageable pageable) {
-        Page<TestPlanSchedule> pages = this.scheduleRepository.findByTestPlanIdAndEnabled(testPlanId, enabled, pageable);
-
-        PaginationResponse response = new PaginationResponse();
-        PaginationResponse.Meta meta = new PaginationResponse.Meta();
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pages.getTotalPages());
-        meta.setTotal(pages.getTotalElements());
-        response.setMeta(meta);
-
-        ArrayList<ResponseScheduleDTO> scheduleDTOs = new ArrayList<>(pages.getContent().stream()
-                .map(schedule -> {
-                    // Get test plan title for each schedule
-                    Optional<TestPlan> testPlanOpt = testPlanService.findById(schedule.getTestPlanId());
-                    String testPlanTitle = testPlanOpt.isPresent() ? testPlanOpt.get().getTitle() : "Unknown";
-                    return mapToResponseScheduleDTO(schedule, testPlanTitle);
-                })
-                .toList());
-
-        response.setResult(scheduleDTOs);
-        return response;
+    /**
+     * Find a schedule by ID or throw exception if not found
+     */
+    private TestPlanSchedule findScheduleById(String scheduleId) {
+        Optional<TestPlanSchedule> scheduleOpt = findById(scheduleId);
+        if (scheduleOpt.isEmpty()) {
+            logger.error("Schedule not found with id: {}", scheduleId);
+            throw new IllegalArgumentException("Schedule not found with id: " + scheduleId);
+        }
+        return scheduleOpt.get();
     }
 
-    @Override
-    public PaginationResponse searchSchedulesByNextRunTime(String testPlanId, LocalDateTime start, LocalDateTime end, Pageable pageable) {
-        Page<TestPlanSchedule> pages = this.scheduleRepository.findByTestPlanIdAndNextRunTimeBetween(testPlanId, start, end, pageable);
-
-        PaginationResponse response = new PaginationResponse();
-        PaginationResponse.Meta meta = new PaginationResponse.Meta();
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pages.getTotalPages());
-        meta.setTotal(pages.getTotalElements());
-        response.setMeta(meta);
-
-        ArrayList<ResponseScheduleDTO> scheduleDTOs = new ArrayList<>(pages.getContent().stream()
-                .map(schedule -> {
-                    // Get test plan title for each schedule
-                    Optional<TestPlan> testPlanOpt = testPlanService.findById(schedule.getTestPlanId());
-                    String testPlanTitle = testPlanOpt.isPresent() ? testPlanOpt.get().getTitle() : "Unknown";
-                    return mapToResponseScheduleDTO(schedule, testPlanTitle);
-                })
-                .toList());
-
-        response.setResult(scheduleDTOs);
-        return response;
+    /**
+     * Validate that a test plan exists and return it
+     */
+    private TestPlan validateTestPlanExists(String testPlanId) {
+        Optional<TestPlan> testPlanOpt = testPlanService.findById(testPlanId);
+        if (testPlanOpt.isEmpty()) {
+            logger.error("Test plan not found with id: {}", testPlanId);
+            throw new IllegalArgumentException("Test plan not found with id: " + testPlanId);
+        }
+        return testPlanOpt.get();
     }
 
+    /**
+     * Get test plan title by ID or return "Unknown" if not found
+     */
+    private String getTestPlanTitle(String testPlanId) {
+        Optional<TestPlan> testPlanOpt = testPlanService.findById(testPlanId);
+        if (testPlanOpt.isEmpty()) {
+            logger.warn("Cannot find test plan with id = {}", testPlanId);
+            return "Unknown";
+        }
+        return testPlanOpt.get().getTitle();
+    }
 
+    /**
+     * Validate that a schedule name is unique for a test plan
+     */
+    private void validateScheduleNameUniqueness(String name, String testPlanId, String excludeId) {
+        ArrayList<TestPlanSchedule> existingSchedules = scheduleRepository.findByName(name);
+        for (TestPlanSchedule existingSchedule : existingSchedules) {
+            // Check if schedule with same name exists for this test plan, excluding the current schedule (for edit)
+            if (existingSchedule.getTestPlanId().equals(testPlanId) &&
+                    (excludeId == null || !existingSchedule.getId().equals(excludeId))) {
+                logger.error("Schedule name already exists for this test plan: {}", name);
+                throw new IllegalArgumentException("Schedule name already exists for this test plan: " + name);
+            }
+        }
+    }
+
+    /**
+     * Save a schedule to both repositories
+     */
+    private TestPlanSchedule saveSchedule(TestPlanSchedule schedule) {
+        scheduleSearchRepository.save(schedule);
+        return scheduleRepository.save(schedule);
+    }
+
+    /**
+     * Set type-specific fields for a schedule
+     */
+    private void setScheduleTypeSpecificFields(
+            TestPlanSchedule schedule,
+            ScheduleType type,
+            LocalDateTime executionTime,
+            String cronExpression) {
+
+        if (type == ScheduleType.ONCE) {
+            schedule.setExecutionTime(executionTime);
+            schedule.setNextRunTime(executionTime);
+            schedule.setCronExpression(null);
+        } else {
+            schedule.setCronExpression(cronExpression);
+            schedule.setExecutionTime(null);
+            schedule.setNextRunTime(calculateNextRunTime(schedule));
+        }
+    }
+
+    /**
+     * Update a schedule after execution based on its type
+     */
+    private void updateScheduleAfterExecution(TestPlanSchedule schedule) {
+        if (schedule.getType() == ScheduleType.ONCE) {
+            schedule.setEnabled(false);
+        } else {
+            LocalDateTime nextRun = calculateNextRunTime(schedule);
+            schedule.setNextRunTime(nextRun);
+        }
+        saveSchedule(schedule);
+    }
 }

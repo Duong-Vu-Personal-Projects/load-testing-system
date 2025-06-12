@@ -8,7 +8,7 @@ const TestRunCompareDetail = (props: ITestRun) => {
     const {testRun} = props;
     return (
         <>
-            <Card title={`Run 1: ${testRun.title}`}>
+            <Card title={testRun.title}>
                 <Descriptions size="small" column={1}>
                     <Descriptions.Item label="Time">
                         {dayjs(testRun.time).format('YYYY-MM-DD HH:mm:ss')}

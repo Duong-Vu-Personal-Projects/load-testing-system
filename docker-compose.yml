@@ -247,21 +247,17 @@ services:
     restart: unless-stopped
     ports:
       - 80:80
-    volumes:
-      - ./frontend:/app  # For development only (remove in production)
-      - /app/node_modules # Don't mount node_modules
-      - ./backend/jmeter:/app/jmeter
+    # volumes:
+    #   - ./frontend:/app  # For development only (remove in production)
+    #   - /app/node_modules # Don't mount node_modules
+    #   - ./backend/jmeter:/app/jmeter
     environment:
       # - NODE_ENV=development  # Change to production for production builds
       VITE_API_URL: http://localhost:8080  # Backend API URL
       VITE_KIBANA_URL: http://localhost:5601  # Kibana URL
       VITE_GRAFANA_URL: http://localhost:3000  # Grafana URL
-      JAVA_TOOL_OPTIONS: >
-        -Djava.security.properties=/dev/null
-        -Djava.protocol.handler.pkgs=org.springframework.boot.loader
-        -Dloader.path=/app/resources,/app/classes,/app/libs
     depends_on:
-      - backend  # Uncomment when backend is enabled
+      - backend 
       - mongodb
     networks:
       - elk
